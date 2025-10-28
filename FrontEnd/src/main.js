@@ -16,7 +16,8 @@ for (const [key, component] of Object.entries(lucide)) {
 }
 
 // ⬇️ Configura o Axios
-axios.defaults.baseURL = 'http://localhost:8000/api'
+//axios.defaults.baseURL = 'http://localhost:8000/api' //pra dev
+axios.defaults.baseURL = 'https://amttdetra.com/estoque_patrimonio/backend/public/api' //pra prod
 axios.defaults.withCredentials = false
 
 const token = localStorage.getItem('token')

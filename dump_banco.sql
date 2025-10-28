@@ -1,3 +1,11 @@
+DROP TABLE IF EXISTS produtos_pedido_consumivel;
+DROP TABLE IF EXISTS pedido_consumivel;
+DROP TABLE IF EXISTS produtos_consumivel;
+DROP TABLE IF EXISTS categoria_consumivel;
+DROP TABLE IF EXISTS saida_consumivel;
+DROP TABLE IF EXISTS entrada_consumivel;
+
+
 CREATE TABLE
   `categoria_consumivel` (
     `categoria_consumivel_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -30,7 +38,7 @@ CREATE TABLE
     `status` varchar(12) DEFAULT 'pendente',
     `data_pedido` date DEFAULT NULL,
     `data_cancelamento` date DEFAULT NULL,
-    `data_alteração` date DEFAULT NULL,
+    `data_alteracao` date DEFAULT NULL,
     `observacoes` varchar(500) DEFAULT NULL,
     PRIMARY KEY (`pedido_consumivel_id`)
   ) ENGINE = InnoDB AUTO_INCREMENT = 156 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

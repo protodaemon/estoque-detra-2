@@ -20,6 +20,17 @@ use App\Models\ProdutoDecoracao;
 use App\Http\Controllers\LocacaoController;
 use App\Http\Controllers\LocalizacaoController;
 
+Route::get('/check-session', function () {
+    if (!isset($_SESSION)) {
+        session_start();
+    }
+    if (isset($_SESSION['nomeServidor'])) {
+        return response()->json(['logado' => true, 'session' => $_SESSION]);
+    }
+    return response()->json(['logado' => false, 'session' => $_SESSION]);
+});
+
+Route::middleware(['check.nome.servidor'])->group(function () {
 Route::post('/login', [UsuarioController::class, 'login']);
 Route::post('/registro', [UsuarioController::class, 'register']);
 Route::middleware('auth.token')->post('/logout', [UsuarioController::class, 'logout']);
@@ -76,7 +87,7 @@ Route::post('/entrada-consumivel', [EntradaConsumivelController::class, 'store']
 //Saída Consumível
 Route::get('/saida-consumivel', [SaidaConsumivelController::class, 'index']);
 Route::post('/saida-consumivel', [SaidaConsumivelController::class, 'store']);
-
+});
 // Criação do pedido consumível
 
 

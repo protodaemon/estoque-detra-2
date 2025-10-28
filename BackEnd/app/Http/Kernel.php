@@ -39,10 +39,16 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-           // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            'check.nome.servidor' => \App\Http\Middleware\CheckNomeServidor::class,
         ],
+    ];
+
+    protected $routeMiddleware = [
+        // ...
+        'check.nome.servidor' => \App\Http\Middleware\CheckNomeServidor::class,
     ];
 
     /**
