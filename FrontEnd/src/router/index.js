@@ -16,7 +16,7 @@ import MenuSaidaConsumivel from '../pages/MenuSaidaConsumivel.vue';
 
 const routes = [
   { 
-    path: '/menu',
+    path: '/',
     name: 'menu',
     component: MenuPrincipal
   },
