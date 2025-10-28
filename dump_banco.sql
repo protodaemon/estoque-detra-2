@@ -56,7 +56,6 @@ INSERT INTO categoria_consumivel (nome, descricao) VALUES
 ('Móveis Diversos', 'Outros tipos de móveis não classificados anteriormente.'),
 ('Mobiliário Geral', 'Sofás e outros itens de uso geral.'),
 ('Equipamentos Audiovisuais', 'Câmeras, caixas de som e aparelhos de áudio.'),
-('ssssasasa', 'sdsd');
 
   INSERT INTO produtos_consumivel (nome, descricao, quantidade, observacoes, categoria_consumivel, ativo) VALUES
 ('Notebook 149', 'Necessita de manutenção preventiva.', 5, 'Localizado no escritório principal.', 33, 0),
@@ -173,3 +172,27 @@ INSERT INTO produtos_pedido_consumivel (pedido_consumivel_id, produtos_consumive
 -- Itens para o Pedido 155 (concluido)
 (155, 566, 1),  -- 1 unidade da 'Geladeira 711'
 (155, 552, 3);  -- 3 unidades da 'Mesa 431'
+
+CREATE TABLE
+  `saida_consumivel` (
+    `saida_consumivel_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `produto_consumivel_id` int(10) unsigned NOT NULL,
+    `quantidade` int(11) NOT NULL,
+    `data_saida` date DEFAULT NULL,
+    `observacao` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`saida_consumivel_id`),
+    KEY `fk_produto_saida_consumivel` (`produto_consumivel_id`),
+    CONSTRAINT `fk_produto_saida_consumivel` FOREIGN KEY (`produto_consumivel_id`) REFERENCES `produtos_consumivel` (`produtos_consumivel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) ENGINE = InnoDB AUTO_INCREMENT = 16 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci
+
+CREATE TABLE
+  `entrada_consumivel` (
+    `entrada_consumivel_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `produto_consumivel_id` int(10) unsigned NOT NULL,
+    `quantidade` int(11) NOT NULL,
+    `data_entrada` date DEFAULT NULL,
+    `observacao` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`entrada_consumivel_id`),
+    KEY `fk_produto_consumivel` (`produto_consumivel_id`),
+    CONSTRAINT `fk_produto_consumivel` FOREIGN KEY (`produto_consumivel_id`) REFERENCES `produtos_consumivel` (`produtos_consumivel_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) ENGINE = InnoDB AUTO_INCREMENT = 18 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci
