@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .text-rosa-destaque {
+    color: #F1B2B5;
+  }
+
+  .bg-rosa-destaque {
+    background-color: #F1B2B5;
+  }
+
+  .hover\:bg-rosa-claro:hover {
+    background-color: #F5C5C5;
+  }
+
+  .border-cinza-borda {
+    border-color: #D2D2D2;
+  }
+
+  .bg-cinza-muito-claro {
+    background-color: #EBECF0;
+  }
+
+  .text-cinza-medio {
+    color: #BEBEBE;
+  }
+
+  .focus\:ring-rosa-destaque:focus {
+    box-shadow: 0 0 0 2px #F1B2B5;
+  }
+}
