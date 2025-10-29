@@ -84,6 +84,52 @@
       {{ notificationMessage }}
     </div>
   </Transition>
+
+  <!-- Modal de Senha -->
+  <Transition name="modal">
+    <div 
+      v-if="showPasswordModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      @click.self="fecharModal"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 transform transition-all">
+        <div class="text-center">
+          <div class="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+            <Package class="w-6 h-6 text-blue-500" />
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Acesso Restrito</h3>
+          <p class="text-sm text-gray-600">Digite a senha para acessar Patrimônios</p>
+        </div>
+
+        <div>
+          <input
+            v-model="senhaDigitada"
+            type="password"
+            placeholder="Digite a senha"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            @keyup.enter="verificarSenha"
+            ref="inputSenha"
+          />
+          <p v-if="senhaErrada" class="text-red-500 text-sm mt-2">Senha incorreta. Tente novamente.</p>
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            @click="fecharModal"
+            class="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            @click="verificarSenha"
+            class="flex-1 px-4 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
+          >
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </div>
 </template>
 
@@ -105,10 +151,15 @@ export default {
     return {
       showNotification: false,
       notificationMessage: '',
+      showPasswordModal: false,
+      senhaDigitada: '',
+      senhaErrada: false,
+      senhaCorreta: '1234', // Defina a senha desejada aqui
+      rotaPendente: null,
       opcoes: [
         {
           titulo: 'Patrimônios',
-          rota: '/patrimonio',
+          rota: '/estoque-patrimonio',
           icone: 'Package',
           descricao: 'Acessar gerenciamento de patrimônios',
           cor: 'blue',
@@ -161,7 +212,17 @@ export default {
     },
 
     navegar(rota) {
-      // Feedback visual
+      // Se for a rota de patrimônio, mostrar modal de senha
+      if (rota === '/estoque-patrimonio') {
+        this.rotaPendente = rota;
+        this.showPasswordModal = true;
+        this.$nextTick(() => {
+          this.$refs.inputSenha?.focus();
+        });
+        return;
+      }
+
+      // Para outras rotas, navegar normalmente
       this.showNotification = true
       this.notificationMessage = `Navegando para ${rota}`
       
@@ -169,10 +230,41 @@ export default {
         this.showNotification = false
       }, 2000)
 
-      // Navegação real
       setTimeout(() => {
         this.$router.push(rota)
       }, 800);
+    },
+
+    verificarSenha() {
+      if (this.senhaDigitada === this.senhaCorreta) {
+        const rota = this.rotaPendente;
+        this.fecharModal();
+        this.showNotification = true;
+        this.notificationMessage = 'Acesso autorizado!';
+        
+        setTimeout(() => {
+          this.showNotification = false;
+        }, 2000);
+
+        setTimeout(() => {
+          if (rota) {
+            this.$router.push(rota);
+          }
+        }, 800);
+      } else {
+        this.senhaErrada = true;
+        this.senhaDigitada = '';
+        setTimeout(() => {
+          this.senhaErrada = false;
+        }, 3000);
+      }
+    },
+
+    fecharModal() {
+      this.showPasswordModal = false;
+      this.senhaDigitada = '';
+      this.senhaErrada = false;
+      this.rotaPendente = null;
     },
 
     getCorClasses(cor) {
@@ -253,5 +345,21 @@ export default {
 .notification-leave-to {
   opacity: 0;
   transform: translateX(100%);
+}
+
+/* Transição do modal */
+.modal-enter-active,
+.modal-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .bg-white,
+.modal-leave-to .bg-white {
+  transform: scale(0.9);
 }
 </style>

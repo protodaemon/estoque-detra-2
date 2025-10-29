@@ -94,14 +94,60 @@
       {{ notificationMessage }}
     </div>
   </Transition>
+
+  <!-- Modal de Senha -->
+  <Transition name="modal">
+    <div 
+      v-if="showPasswordModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      @click.self="fecharModal"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 transform transition-all">
+        <div class="text-center">
+          <div class="mx-auto w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mb-4">
+            <PackageOpen class="w-6 h-6 text-rose-500" />
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Acesso Restrito</h3>
+          <p class="text-sm text-gray-600">Digite a senha para acessar esta área</p>
+        </div>
+
+        <div>
+          <input
+            v-model="senhaDigitada"
+            type="password"
+            placeholder="Digite a senha"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none transition-all"
+            @keyup.enter="verificarSenha"
+            ref="inputSenha"
+          />
+          <p v-if="senhaErrada" class="text-red-500 text-sm mt-2">Senha incorreta. Tente novamente.</p>
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            @click="fecharModal"
+            class="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            @click="verificarSenha"
+            class="flex-1 px-4 py-3 bg-rose-500 text-white rounded-lg font-medium hover:bg-rose-600 transition-colors"
+          >
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </div>
 </template>
 
 <script>
-import { PackageOpen, Package, Palette, ClipboardList, UserPlus, Plus, Truck, Inbox } from 'lucide-vue-next'
+import { PackageOpen, Package, Palette, ClipboardList, UserPlus, Plus, Truck, Inbox, ArrowLeft, ChevronRight } from 'lucide-vue-next'
 
 export default {
-  name: 'MenuPrincipal',
+  name: 'MenuConsumivel',
   components: {
     PackageOpen,
     Package,
@@ -110,12 +156,19 @@ export default {
     UserPlus,
     Plus,
     Truck,
-    Inbox
+    Inbox,
+    ArrowLeft,
+    ChevronRight
   },
   data() {
     return {
       showNotification: false,
       notificationMessage: '',
+      showPasswordModal: false,
+      senhaDigitada: '',
+      senhaErrada: false,
+      senhaCorreta: '1234', // Defina a senha desejada aqui
+      rotaPendente: null,
       opcoes: [
         {
           titulo: 'Estoque Consumível',
@@ -123,23 +176,17 @@ export default {
           icone: 'Palette',
           descricao: 'Consulte, adicione e gerencie itens de consumo',
           cor: 'blue',
-          badge: null
+          badge: null,
+          requerSenha: true // Marcar rotas que precisam de senha
         },
-        /*{
-          titulo: 'Novo Usuário',
-          rota: '/cadastro-usuario',
-          icone: 'UserPlus',
-          descricao: 'Adicione e configure novos usuários no sistema',
-          cor: 'green',
-          badge: null
-        },*/
         {
           titulo: 'Gerenciar Entradas',
           rota: '/entrada-consumivel',
           icone: 'Truck',
           descricao: "Adicione ou exclua produtos para consumo",
           cor: 'rose',
-          badge: null
+          badge: null,
+          requerSenha: true // Marcar rotas que precisam de senha
         },
         {
           titulo: 'Realizar Pedido',
@@ -147,47 +194,30 @@ export default {
           icone: 'Inbox',
           descricao: "Novo pedido de produtos para consumo",
           cor: 'blue',
-          badge: null
+          badge: null,
+          requerSenha: false // Esta não precisa de senha
         }
-/*         ,{
-          titulo: 'Teste front 🥀💀',
-          rota: '/menu-entradas-consumivel',
-          icone: 'Inbox',
-          descricao: "Aqueles que sabe ☠️",
-          cor: 'blue',
-          badge: null
-        } */
       ]
     }
   },
   mounted(){
   },
   methods: {
-/* 
-    async carregarEstatisticas(){
-      try{
-        const response = await this.$axios.get('/estatisticas');
-        this.atualizarBadges(response.data.estatisticas);
-      }catch(error){
-        console.error('Erro ao carregar estatisticas:', error);
-      }
-    },
-    atualizarBadges(estatisticas){
-      this.opcoes.forEach(opcao => {
-        if(opcao.rota === '/estoque-decoracao'){
-          opcao.badge = `${estatisticas.decoracao} itens`;
-        }
-        if(opcao.rota === '/estoque-artesanato'){
-          opcao.badge = `${estatisticas.artesanato} produtos`
-        }
-        if(opcao.rota === '/listas-locacao'){
-          opcao.badge = `${estatisticas.locacao} listas`
-        }
-      })
-    }, */
 
     navegar(rota) {
-      // Feedback visual
+      // Verificar se a opção requer senha
+      const opcao = this.opcoes.find(o => o.rota === rota);
+      
+      if (opcao && opcao.requerSenha) {
+        this.rotaPendente = rota;
+        this.showPasswordModal = true;
+        this.$nextTick(() => {
+          this.$refs.inputSenha?.focus();
+        });
+        return;
+      }
+
+      // Para rotas sem senha, navegar normalmente
       this.showNotification = true
       this.notificationMessage = `Navegando para ${rota}`
       
@@ -195,10 +225,41 @@ export default {
         this.showNotification = false
       }, 2000)
 
-      // Navegação real
       setTimeout(() => {
         this.$router.push(rota)
       }, 800);
+    },
+
+    verificarSenha() {
+      if (this.senhaDigitada === this.senhaCorreta) {
+        const rota = this.rotaPendente;
+        this.fecharModal();
+        this.showNotification = true;
+        this.notificationMessage = 'Acesso autorizado!';
+        
+        setTimeout(() => {
+          this.showNotification = false;
+        }, 2000);
+
+        setTimeout(() => {
+          if (rota) {
+            this.$router.push(rota);
+          }
+        }, 800);
+      } else {
+        this.senhaErrada = true;
+        this.senhaDigitada = '';
+        setTimeout(() => {
+          this.senhaErrada = false;
+        }, 3000);
+      }
+    },
+
+    fecharModal() {
+      this.showPasswordModal = false;
+      this.senhaDigitada = '';
+      this.senhaErrada = false;
+      this.rotaPendente = null;
     },
 
     getCorClasses(cor) {
@@ -236,8 +297,6 @@ export default {
       }
       return cores[cor] || cores.pink
     }
-
-
   }
 }
 </script>
@@ -281,5 +340,21 @@ export default {
 .notification-leave-to {
   opacity: 0;
   transform: translateX(100%);
+}
+
+/* Transição do modal */
+.modal-enter-active,
+.modal-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .bg-white,
+.modal-leave-to .bg-white {
+  transform: scale(0.9);
 }
 </style>
