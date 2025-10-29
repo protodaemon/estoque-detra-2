@@ -15,7 +15,7 @@ class MovimentacaoPatrimonio extends Model
         'tipo_movimentacao',
         'localizacao_anterior_id',
         'localizacao_nova_id',
-        'usuario_id',
+        'usuario',
         'observacao',
         'data_movimentacao'
     ];
