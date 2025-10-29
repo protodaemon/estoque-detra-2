@@ -154,7 +154,7 @@ export default {
       showPasswordModal: false,
       senhaDigitada: '',
       senhaErrada: false,
-      senhaCorreta: '1234', // Defina a senha desejada aqui
+      senhaCorreta: 'detra123456', // Defina a senha desejada aqui
       rotaPendente: null,
       opcoes: [
         {

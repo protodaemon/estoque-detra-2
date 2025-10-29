@@ -24,7 +24,7 @@ export default {
     // LÁ EM BAIXO NO COMPOENTNE
   },
   methods: {
-    async checaSessao() {
+    async checaSessao() { 
       try {
         const response = await axios.get(
           "https://amttdetra.com/questionario_validador/backend/public/api/check-session",
@@ -37,15 +37,15 @@ export default {
           window.location.href = "https://amttdetra.com/index.php";
         } else {
           // Atualiza os valores reativos com os dados corretos
-          this.nivelAcesso.value = response.data.session.nivel_acesso; // Captura o nível de acesso
-          this.usuario.value = response.data.session.nomeServidor; // Captura o nome do servidor
+          this.nivelAcesso.value = response.data.session.nivel_acesso;
+          this.usuario.value = response.data.session.nomeServidor; 
         }
       } catch (error) {
         console.error("Erro ao verificar a sessão:", error);
         // Redireciona em caso de erro, assumindo que o erro indica token ausente ou inválido
         window.location.href = "https://amttdetra.com/index.php";
       }
-    },
+    }, 
   },
 }
 </script>

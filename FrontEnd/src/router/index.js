@@ -17,6 +17,10 @@ import MenuSaidaConsumivel from '../pages/MenuSaidaConsumivel.vue';
 const routes = [
   { 
     path: '/',
+    redirect: 'menu'
+  },
+  { 
+    path: '/menu',
     name: 'menu',
     component: MenuPrincipal
   },
@@ -73,7 +77,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
 
