@@ -107,7 +107,7 @@
 
           <!-- Card de total de itens -->
           <div class="text-right bg-blue-50 p-4 rounded-xl flex-shrink-0">
-            <div class="text-sm text-gray-600 mb-2">Total de itens: {{ itensLocacao.length }}</div>
+            <div class="text-sm text-gray-600 mb-2">Total de itens: {{ itensPedido.length }}</div>
           </div>
         </div>
       </div>
@@ -131,13 +131,13 @@
           @dragleave="handleDragLeave" @drop="onDrop">
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-2xl font-bold text-blue-700">Itens Selecionados</h3>
-            <span v-if="itensLocacao.length > 0"
+            <span v-if="itensPedido.length > 0"
               class="text-sm text-gray-600 bg-blue-100 px-4 py-2 rounded-full font-medium">
-              {{ itensLocacao.length }} {{ itensLocacao.length === 1 ? 'item' : 'itens' }}
+              {{ itensPedido.length }} {{ itensPedido.length === 1 ? 'item' : 'itens' }}
             </span>
           </div>
 
-          <div v-if="itensLocacao.length === 0" class="text-center py-16">
+          <div v-if="itensPedido.length === 0" class="text-center py-16">
             <div class="w-24 h-24 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
               <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
@@ -149,7 +149,7 @@
           </div>
 
           <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <div v-for="(item, index) in itensLocacao" :key="item.uniqueId"
+            <div v-for="(item, index) in itensPedido" :key="item.uniqueId"
               class="bg-white shadow-lg hover:shadow-xl p-4 relative transition-all duration-300 border border-gray-200 hover:border-blue-300 rounded-2xl transform hover:-translate-y-1"
               :class="{ 'border-red-400 bg-red-50': (temErroQuantidade(item) && pedidoSelecionadoId == null) }">
               <div class="relative bg-gray-50 rounded-xl mb-4 overflow-hidden" style="height: 180px;">
@@ -188,7 +188,7 @@
                     class="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-bold text-gray-600 transition-colors flex items-center justify-center">
                     -
                   </button>
-                  <input v-model.number="item.qtdParaLocacao" type="number" min="1" :max="item.quantidade"
+                  <input v-model.number="item.qtdPedido" type="number" min="1" :max="item.quantidade"
                     class="flex-1 px-3 py-2 border rounded-lg text-sm text-center transition-all"
                     :class="[
                       (temErroQuantidade(item) && pedidoSelecionadoId == null)
@@ -199,7 +199,18 @@
                     @blur="corrigirQuantidadeSeNecessario(index)"
                     @keyup.enter="corrigirQuantidadeSeNecessario(index)" 
                   />
-                  <button @click="aumentarQuantidade(index)" :disabled="item.qtdParaLocacao >= item.quantidade"
+<!--                   <input v-else-if="pedidoSelecionadoId !== null" v-model.number="item.qtdPedidoReservado" type="number" min="1" :max="item.quantidade"
+                    class="flex-1 px-3 py-2 border rounded-lg text-sm text-center transition-all"
+                    :class="[
+                      temErroQuantidade(item)
+                        ? 'border-red-500 bg-red-50 focus:ring-red-300 focus:border-red-500'
+                        : 'border-gray-300 focus:ring-blue-300 focus:border-transparent'
+                    ]"
+                    @input="validarQuantidade(index)" 
+                    @blur="corrigirQuantidadeSeNecessario(index)"
+                    @keyup.enter="corrigirQuantidadeSeNecessario(index)" 
+                  /> -->
+                  <button @click="aumentarQuantidade(index)" :disabled="item.qtdPedido >= item.quantidade"
                     class="w-8 h-8 bg-blue-200 hover:bg-blue-300 disabled:bg-gray-200 disabled:text-gray-400 rounded-lg text-sm font-bold text-blue-700 transition-colors flex items-center justify-center">
                     +
                   </button>
@@ -210,7 +221,10 @@
                 </div>
 
                 <div v-if="pedidoSelecionadoId == null" class="text-xs text-gray-500 text-center">
-                  {{ item.qtdParaLocacao }} de {{ item.quantidade }} disponíveis
+                  {{ item.qtdPedido }} de {{ item.quantidade }} disponíveis
+                </div>
+                <div v-else-if="pedidoSelecionadoId !== null" class="text-xs text-gray-500 text-center">
+                  {{ item.qtdPedidoReservado }} de {{ item.quantidade }} disponíveis
                 </div>
               </div>
 
@@ -338,13 +352,13 @@
               <!-- Botão Salvar/Atualizar Pedido -->
               <button 
                 @click="salvarOuAtualizarPedido"
-                :disabled="salvando || (itensLocacao.length === 0 && this.itensRemovidosIds.length <= 0) || temItensComErro" 
+                :disabled="salvando || (itensPedido.length === 0 && this.itensRemovidosIds.length <= 0) || temItensComErro" 
                 :class="[
                   'text-white font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 hover:shadow-xl flex items-center gap-2',
                   pedidoSelecionadoId !== null 
                     ? 'bg-orange-600 hover:bg-orange-700' 
                     : 'bg-blue-600 hover:bg-blue-700',
-                  (salvando || (itensLocacao.length === 0 && this.itensRemovidosIds.length <= 0) || temItensComErro) ? 'opacity-50 cursor-not-allowed' : ''
+                  (salvando || (itensPedido.length === 0 && this.itensRemovidosIds.length <= 0) || temItensComErro) ? 'opacity-50 cursor-not-allowed' : ''
                 ]"
               >
                 <svg v-if="!salvando" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -401,7 +415,7 @@ export default {
       pedidos: [],
       error: null,
       produtos: [],
-      itensLocacao: [],
+      itensPedido: [],
       itensRemovidosIds: [], // Array para rastrear IDs dos itens removidos
       filtros: {
         searchProduto: '',
@@ -423,13 +437,13 @@ export default {
     },
 
     valorTotalLocacao() {
-      return this.itensLocacao.reduce((total, item) => {
-        return total + (parseFloat(item.valor_locacao) * item.qtdParaLocacao)
+      return this.itensPedido.reduce((total, item) => {
+        return total + (parseFloat(item.valor_locacao) * item.qtdPedido)
       }, 0)
     },
 
     temItensComErro() {
-      return this.itensLocacao.some(item => this.temErroQuantidade(item))
+      return this.itensPedido.some(item => this.temErroQuantidade(item))
     }
   },
 
@@ -447,13 +461,19 @@ export default {
 
   methods: {
     temErroQuantidade(item) {
-      if (!item || !item.qtdParaLocacao || !item.quantidade) return false
+      if (!item || !item.qtdPedido || !item.quantidade) return false
+      const disponivel = Number.parseInt(item.quantidade, 10)
 
-      const quantidade = parseInt(item.qtdParaLocacao)
-      const disponivel = parseInt(item.quantidade)
+      const qtd = Number.parseInt
+      (
+        (this.pedidoSelecionadoId !== null)
+          ? quantidade = item.qtdPedido
+          : delta = disponivel - item.qtdPedido
+        ,10
+      )
 
-      return quantidade <= 0 ||
-        quantidade > disponivel ||
+      return $quantidade <= 0 ||
+        $quantidade > disponivel ||
         !Number.isInteger(quantidade) ||
         isNaN(quantidade)
     },
@@ -477,7 +497,7 @@ export default {
         data: '',
         dataRetorno: null,
       }
-      this.itensLocacao = []
+      this.itensPedido = []
       this.observacoes = ''
       this.pedidoSelecionadoId = null
       this.filtros = {
@@ -528,10 +548,10 @@ export default {
       const novoItem = {
         ...produto,
         uniqueId: Date.now() + Math.random(),
-        qtdParaLocacao: 1
+        qtdPedido: 1
       }
 
-      this.itensLocacao.push(novoItem)
+      this.itensPedido.push(novoItem)
       this.atualizarStatusProdutos()
     },
 
@@ -542,13 +562,13 @@ export default {
     },
 
     itemJaSelecionado(produtoId) {
-      return this.itensLocacao.some(item =>
+      return this.itensPedido.some(item =>
         parseInt(item.id) === parseInt(produtoId)
       )
     },
 
     removerItem(index) {
-      const item = this.itensLocacao[index]
+      const item = this.itensPedido[index]
       
       // Se o item tem produtos_pedido_consumivel_id, significa que veio do banco
       // Adiciona ao array de itens removidos para deletar no backend
@@ -557,31 +577,31 @@ export default {
         console.log('Item marcado para deleção:', item.produtos_pedido_consumivel_id)
       }
       
-      this.itensLocacao.splice(index, 1)
+      this.itensPedido.splice(index, 1)
       this.atualizarStatusProdutos()
     },
 
     aumentarQuantidade(index) {
-      const item = this.itensLocacao[index]
-      if (item && item.qtdParaLocacao < item.quantidade) {
-        item.qtdParaLocacao++
+      const item = this.itensPedido[index]
+      if (item && item.qtdPedido < item.quantidade) {
+        item.qtdPedido++
         this.$forceUpdate()
       }
     },
 
     diminuirQuantidade(index) {
-      const item = this.itensLocacao[index]
-      if (item && item.qtdParaLocacao > 1) {
-        item.qtdParaLocacao--
+      const item = this.itensPedido[index]
+      if (item && item.qtdPedido > 1) {
+        item.qtdPedido--
         this.$forceUpdate()
       }
     },
 
     validarQuantidade(index) {
-      const item = this.itensLocacao[index]
+      const item = this.itensPedido[index]
       if (!item) return
 
-      let quantidade = item.qtdParaLocacao
+      let quantidade = item.qtdPedido
 
       if (typeof quantidade === 'string') {
         quantidade = parseInt(quantidade) || 1
@@ -593,7 +613,7 @@ export default {
         quantidade = 1
       }
 
-      this.itensLocacao.splice(index, 1, { ...item, qtdParaLocacao: quantidade })
+      this.itensPedido.splice(index, 1, { ...item, qtdPedido: quantidade })
     },
 
     corrigirQuantidadeSeNecessario(index) {
@@ -609,10 +629,10 @@ export default {
     },
 
     limparLista() {
-      if (this.itensLocacao.length === 0) return
+      if (this.itensPedido.length === 0) return
 
       if (confirm('Deseja realmente limpar toda a lista de itens selecionados?')) {
-        this.itensLocacao = []
+        this.itensPedido = []
         this.atualizarStatusProdutos()
       }
     },
@@ -626,7 +646,7 @@ export default {
     },
 
     async salvarPedido() {
-      if (this.itensLocacao.length === 0) {
+      if (this.itensPedido.length === 0) {
         alert('⚠️ Adicione pelo menos um item à lista antes de salvar.')
         return
       }
@@ -641,9 +661,9 @@ export default {
       try {
         const payload = {
           observacao: this.observacoes.trim() || null,
-          itens: this.itensLocacao.map(item => ({
+          itens: this.itensPedido.map(item => ({
             id: parseInt(item.produtos_consumivel_id),
-            quantidade: parseInt(item.qtdParaLocacao),
+            quantidade: parseInt(item.qtdPedido),
           }))
         }
 
@@ -660,7 +680,7 @@ export default {
           mensagem: 'O pedido foi salvo e o estoque foi atualizado automaticamente.',
           detalhes: {
             pedidoId: response.data.pedido_consumivel_id,
-            totalItens: this.itensLocacao.length,
+            totalItens: this.itensPedido.length,
             status: 'Pendente'
           }
         }
@@ -699,12 +719,12 @@ export default {
 
     async atualizarPedido() {
       // Permite exclusão: zero itens selecionados, mas há itens removidos
-      if (this.itensLocacao.length === 0 && this.itensRemovidosIds.length === 0) {
+      if (this.itensPedido.length === 0 && this.itensRemovidosIds.length === 0) {
         alert('⚠️ Adicione pelo menos um item à lista antes de atualizar.')
         return
       }
 
-      if (this.itensLocacao.length === 0 && this.itensRemovidosIds.length > 0) {
+      if (this.itensPedido.length === 0 && this.itensRemovidosIds.length > 0) {
         if (!confirm('⚠️ Todos os itens serão removidos. Deseja EXCLUIR o pedido permanentemente?')) {
           return
         }
@@ -723,9 +743,9 @@ export default {
       try {
         const payload = {
           observacao: this.observacoes.trim() || null,
-          itens: this.itensLocacao.map(item => ({
+          itens: this.itensPedido.map(item => ({
             id: parseInt(item.produtos_consumivel_id),
-            quantidade: parseInt(item.qtdParaLocacao),
+            quantidade: parseInt(item.qtdPedido),
           })),
           itens_deletados: this.itensRemovidosIds
         }
@@ -752,7 +772,7 @@ export default {
             mensagem: 'O pedido foi atualizado e o estoque foi ajustado automaticamente.',
             detalhes: {
               pedidoId: this.pedidoSelecionadoId,
-              totalItens: this.itensLocacao.length,
+              totalItens: this.itensPedido.length,
               itensRemovidos: this.itensRemovidosIds.length,
               status: 'Atualizado'
             }
@@ -792,7 +812,7 @@ export default {
 
     limparFormulario() {
       this.observacoes = ''
-      this.itensLocacao = []
+      this.itensPedido = []
       this.itensRemovidosIds = [] // Limpa array de itens removidos
       this.filtros.searchProduto = ''
       this.paginaAtual = 1
@@ -893,7 +913,7 @@ export default {
         }
 
         const itens = Array.isArray(pedidoDetalhe.itens) ? pedidoDetalhe.itens : []
-        this.itensLocacao = this.mapItensPedidoParaItensLocacao(itens)
+        this.itensPedido = this.mapItensPedidoParaitensPedido(itens)
       
         this.observacoes = pedidoDetalhe.observacoes || ''
         this.pedidoSelecionadoId = pedidoDetalhe.id || pedidoDetalhe.pedido_consumivel_id || null
@@ -908,7 +928,7 @@ export default {
       }
     },
 
-    mapItensPedidoParaItensLocacao(itens) {
+    mapItensPedidoParaitensPedido(itens) {
       return itens.map((i) => {
         const produto = i.produto || i.consumivel || i.item || {}
         const produtoId = parseInt(i.produtos_consumivel_id ?? produto.id ?? i.id)
@@ -924,7 +944,8 @@ export default {
           nome: produto.nome || i.nome || `Produto ${produtoId}`,
           foto: produto.foto || null,
           quantidade: isNaN(estoqueDisponivel) ? qtdSolicitada : estoqueDisponivel,
-          qtdParaLocacao: isNaN(qtdSolicitada) ? 1 : qtdSolicitada,
+          qtdPedido: isNaN(qtdSolicitada) ? 1 : qtdSolicitada,
+          qtdPedidoReservado: isNaN(qtdSolicitada) ? 1 : qtdSolicitada,
           valor_locacao: produto.valor_locacao ?? i.valor_locacao ?? 0,
           uniqueId: Date.now() + Math.random()
         }
@@ -932,11 +953,11 @@ export default {
     },
 
     limparDados() {
-      if (this.itensLocacao.length > 0 || this.observacoes || this.pedidoSelecionadoId !== null) {
+      if (this.itensPedido.length > 0 || this.observacoes || this.pedidoSelecionadoId !== null) {
         if (confirm('Deseja realmente limpar todos os dados do formulário?')) {
           this.pedidoSelecionadoId = null
           this.observacoes = ''
-          this.itensLocacao = []
+          this.itensPedido = []
           this.itensRemovidosIds = [] // Limpa array de itens removidos
           this.atualizarStatusProdutos()
           console.log('Dados limpos com sucesso')
