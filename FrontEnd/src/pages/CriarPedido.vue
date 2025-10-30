@@ -37,22 +37,35 @@
               <ArrowLeft class="w-5 h-5" />
             </button>
             <div>
-              <h1 class="text-2xl font-bold text-gray-800">Criar Lista de Locação</h1>
+              <h1 class="text-2xl font-bold text-gray-800">
+                {{ pedidoSelecionadoId !== null ? 'Editar Pedido' : 'Criar Pedido' }}
+              </h1>
               <div class="flex items-center text-sm text-gray-600 mt-1 space-x-2">
                 <span class="text-gray-400">Menu</span>
                 <ChevronRight class="w-4 h-4" />
-                <span class="text-blue-600 font-medium">Criação Listas</span>
+                <span class="text-gray-400">Menu Consumível</span>
+                <ChevronRight class="w-4 h-4" />
+                <span class="text-gray-400">Menu Pedidos</span>
+                <ChevronRight class="w-4 h-4" />
+                <span class="text-blue-600 font-medium">
+                  {{ pedidoSelecionadoId !== null ? 'Editar Pedido' : 'Criar Pedido' }}
+                </span>
               </div>
             </div>
           </div>
 
-            <!-- NOVO BOTÃO À DIREITA -->
+          <!-- BOTÃO EDITAR PEDIDOS -->
           <div class="flex items-center">
             <button
               @click="abrirHistorico"
-              class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors mr-3"
-              title="consultar-pedidos">
-              Consultar Pedidos
+              class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors mr-3 flex items-center gap-2"
+              title="Editar Pedidos">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                </path>
+              </svg>
+              Editar Pedidos
             </button>
           </div>
         </div>
@@ -67,14 +80,14 @@
             <!-- Campo ID à esquerda com largura dinâmica -->
             <div v-if="pedidoSelecionadoId !== null" class="flex-shrink-0">
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                ID
+                ID do Pedido
               </label>
               <input
                 :value="pedidoSelecionadoId"
                 type="text"
                 readonly
-                :style="{ width: `${Math.max(60, String(pedidoSelecionadoId).length * 12 + 40)}px` }"
-                class="font-mono py-2 px-4 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-700 transition-all text-center"
+                :style="{ width: `${Math.max(80, String(pedidoSelecionadoId).length * 12 + 40)}px` }"
+                class="font-mono py-2 px-4 border-2 border-blue-300 rounded-lg bg-blue-50 text-blue-700 transition-all text-center font-semibold"
               />
             </div>
 
@@ -95,9 +108,6 @@
           <!-- Card de total de itens -->
           <div class="text-right bg-blue-50 p-4 rounded-xl flex-shrink-0">
             <div class="text-sm text-gray-600 mb-2">Total de itens: {{ itensLocacao.length }}</div>
-            <div class="text-2xl font-bold text-blue-700">
-              <!-- R$ {{ valorTotalLocacao.toFixed(2) }} -->
-            </div>
           </div>
         </div>
       </div>
@@ -116,7 +126,7 @@
         </div>
 
         <div
-          class="bg-white border-4 border-dashed border-blue-300 rounded-2xl p-6 min-h-[300px] shadow-lg transition-all duration-300 border-gray-200"
+          class="bg-white border-4 border-dashed border-blue-300 rounded-2xl p-6 min-h-[300px] shadow-lg transition-all duration-300"
           :class="{ 'border-blue-500 bg-blue-50 scale-102': isDragging }" @dragover.prevent="handleDragOver"
           @dragleave="handleDragLeave" @drop="onDrop">
           <div class="flex justify-between items-center mb-6">
@@ -170,9 +180,6 @@
 
               <div class="mb-4">
                 <h3 class="text-sm font-bold text-blue-700 mb-2 leading-tight">{{ item.nome }}</h3>
-                <!--                 <div class="text-lg font-bold text-green-600 mb-3">
-                  R$ {{ item.valor_locacao }}
-                </div> -->
               </div>
 
               <div class="space-y-2">
@@ -182,15 +189,19 @@
                     -
                   </button>
                   <input v-model.number="item.qtdParaLocacao" type="number" min="1" :max="item.quantidade"
-                    class="flex-1 px-3 py-2 border rounded-lg text-sm text-center transition-all" :class="[
+                    class="flex-1 px-3 py-2 border rounded-lg text-sm text-center transition-all"
+                    :class="[
                       (temErroQuantidade(item) && pedidoSelecionadoId == null)
                         ? 'border-red-500 bg-red-50 focus:ring-red-300 focus:border-red-500'
                         : 'border-gray-300 focus:ring-blue-300 focus:border-transparent'
-                    ]" @input="validarQuantidade(index)" @blur="corrigirQuantidadeSeNecessario(index)"
-                    @keyup.enter="corrigirQuantidadeSeNecessario(index)" />
+                    ]"
+                    @input="validarQuantidade(index)" 
+                    @blur="corrigirQuantidadeSeNecessario(index)"
+                    @keyup.enter="corrigirQuantidadeSeNecessario(index)" 
+                  />
                   <button @click="aumentarQuantidade(index)" :disabled="item.qtdParaLocacao >= item.quantidade"
                     class="w-8 h-8 bg-blue-200 hover:bg-blue-300 disabled:bg-gray-200 disabled:text-gray-400 rounded-lg text-sm font-bold text-blue-700 transition-colors flex items-center justify-center">
-                    
+                    +
                   </button>
                 </div>
 
@@ -198,7 +209,7 @@
                   Máximo disponível: {{ item.quantidade }}
                 </div>
 
-                <div v-if="pedidoSelecionadoId == null" class="text-xs text-gray-500 text-center"> jamba
+                <div v-if="pedidoSelecionadoId == null" class="text-xs text-gray-500 text-center">
                   {{ item.qtdParaLocacao }} de {{ item.quantidade }} disponíveis
                 </div>
               </div>
@@ -232,20 +243,29 @@
 
           <div v-else>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              <div v-for="peca in produtosFiltrados" :key="peca.id" :class="[
-                'bg-white shadow-lg p-4 transition-all duration-300 border border-gray-200 rounded-2xl',
-                peca.quantidade === 0
-                  ? 'opacity-40 cursor-not-allowed grayscale'
-                  : itemJaSelecionado(peca.id)
-                    ? 'border-2 border-blue-500 bg-blue-50 opacity-60'
-                    : 'cursor-move hover:shadow-xl hover:border-blue-300 hover:-translate-y-2 transform'
-              ]" :draggable="peca.quantidade > 0 && !itemJaSelecionado(peca.id)"
-                @dragstart="startDrag($event, peca)" @dblclick="adicionarItemDuplo(peca)">
+              <div
+                v-for="peca in produtosFiltrados"
+                :key="peca.id"
+                :class="[
+                  'bg-white shadow-lg p-4 transition-all duration-300 border border-gray-200 rounded-2xl',
+                  peca.quantidade === 0
+                    ? 'opacity-40 cursor-not-allowed grayscale'
+                    : itemJaSelecionado(peca.id)
+                      ? 'border-2 border-blue-500 bg-blue-50 opacity-60'
+                      : 'cursor-move hover:shadow-xl hover:border-blue-300 hover:-translate-y-2 transform'
+                ]"
+                :draggable="peca.quantidade > 0 && !itemJaSelecionado(peca.id)"
+                @dragstart="startDrag($event, peca)"
+                @dblclick="adicionarItemDuplo(peca)"
+              >
                 <div class="relative bg-gray-50 rounded-xl mb-4 overflow-hidden" style="height: 180px;">
                   <template v-if="peca.foto">
-                    <img :src="peca.foto" :alt="peca.nome"
+                    <img
+                      :src="peca.foto"
+                      :alt="peca.nome"
                       class="w-full h-full object-cover transition-transform duration-300"
-                      :class="{ 'hover:scale-110': !itemJaSelecionado(peca.id) && peca.quantidade > 0 }" />
+                      :class="{ 'hover:scale-110': !itemJaSelecionado(peca.id) && peca.quantidade > 0 }"
+                    />
                   </template>
                   <template v-else>
                     <div class="w-full h-full flex items-center justify-center text-gray-400">
@@ -269,8 +289,7 @@
                       class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
                       Danificado: {{ peca.qtd_danificado }}
                     </div>
-                    <div
-                      class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
+                    <div class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
                       ID: {{ peca.produtos_consumivel_id }}
                     </div>
                   </div>
@@ -290,7 +309,6 @@
               </div>
             </div>
 
-            <!-- Paginação -->
             <div v-if="totalPaginas > 1" class="flex justify-end mt-6">
               <Paginacao 
                 :paginaAtual="paginaAtual" 
@@ -304,9 +322,8 @@
         <div class="">
           <div class="flex flex-col lg:flex-row justify-between items-center gap-4">
             <div class="flex gap-4">
-              <!-- Botão Limpar Dados (só aparece quando há pedido selecionado) -->
+              <!-- Botão Limpar Dados (sempre visível) -->
               <button 
-                v-if="pedidoSelecionadoId !== null"
                 @click="limparDados"
                 class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 hover:shadow-xl flex items-center gap-2"
               >
@@ -318,19 +335,23 @@
                 Limpar Dados
               </button>
 
-              <!-- Botão Salvar Pedido -->
+              <!-- Botão Salvar/Atualizar Pedido -->
               <button 
-                v-if="pedidoSelecionadoId == null"
-                @click="salvarPedido"
-                :disabled="salvando" 
+                @click="salvarOuAtualizarPedido"
+                :disabled="salvando || (itensLocacao.length === 0 && this.itensRemovidosIds.length <= 0) || temItensComErro" 
                 :class="[
-                  'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 hover:shadow-xl flex items-center gap-2',
-                  salvando ? 'opacity-50 cursor-not-allowed' : ''
+                  'text-white font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 hover:shadow-xl flex items-center gap-2',
+                  pedidoSelecionadoId !== null 
+                    ? 'bg-orange-600 hover:bg-orange-700' 
+                    : 'bg-blue-600 hover:bg-blue-700',
+                  (salvando || (itensLocacao.length === 0 && this.itensRemovidosIds.length <= 0) || temItensComErro) ? 'opacity-50 cursor-not-allowed' : ''
                 ]"
               >
                 <svg v-if="!salvando" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                    d="M5 13l4 4L19 7">
+                    :d="pedidoSelecionadoId !== null 
+                      ? 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
+                      : 'M5 13l4 4L19 7'">
                   </path>
                 </svg>
                 <svg v-else class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -338,7 +359,7 @@
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
                   </path>
                 </svg>
-                {{ salvando ? 'Salvando...' : 'Salvar Pedido' }}
+                {{ salvando ? 'Salvando...' : (pedidoSelecionadoId !== null ? 'Atualizar Pedido' : 'Salvar Pedido') }}
               </button>
             </div>
           </div>
@@ -354,13 +375,16 @@ import Paginacao from '../components/Paginacao.vue'
 import ModalParaCriacaoDeEvento from '../components/ModalParaCriacaoDeEvento.vue'
 import ModalResultadoLocacao from '../components/ModalResultadoLocacao.vue'
 import ModalHistoricoPedidos from '../components/ModalHistoricoPedidos.vue'
+import { ArrowLeft, ChevronRight } from 'lucide-vue-next'
   
 export default {
   components: {
     Paginacao,
     ModalParaCriacaoDeEvento,
     ModalResultadoLocacao,
-    ModalHistoricoPedidos
+    ModalHistoricoPedidos,
+    ArrowLeft,
+    ChevronRight
   },
   data() {
     return {
@@ -378,10 +402,10 @@ export default {
       error: null,
       produtos: [],
       itensLocacao: [],
+      itensRemovidosIds: [], // Array para rastrear IDs dos itens removidos
       filtros: {
         searchProduto: '',
       },
-      // ID do pedido carregado via histórico (mostra o campo quando não for null)
       pedidoSelecionadoId: null,
       paginaAtual: 1,
       totalPaginas: 1,
@@ -395,7 +419,6 @@ export default {
   },
   computed: {
     produtosFiltrados() {
-      // Retorna os produtos já filtrados pelo servidor
       return Array.isArray(this.produtos) ? this.produtos : []
     },
 
@@ -413,18 +436,16 @@ export default {
   watch: {
     'filtros.searchProduto': {
       handler() {
-        // Debounce para busca
         this.limparTimeouts()
         this.searchTimeout = setTimeout(() => {
-          this.paginaAtual = 1 // Resetar para primeira página ao buscar
+          this.paginaAtual = 1
           this.carregarProdutos()
-        }, 500) // Aguarda 500ms após usuário parar de digitar
+        }, 500)
       }
     }
   },
 
   methods: {
-    // Verifica se um item tem erro de quantidade
     temErroQuantidade(item) {
       if (!item || !item.qtdParaLocacao || !item.quantidade) return false
 
@@ -437,7 +458,6 @@ export default {
         isNaN(quantidade)
     },
 
-    // Gerenciamento do evento
     confirmarEvento(dados) {
       this.mostrarModalEvento = false
       this.eventoConfirmado = true
@@ -460,13 +480,11 @@ export default {
       this.itensLocacao = []
       this.observacoes = ''
       this.pedidoSelecionadoId = null
-      // this.mostrarModalEvento = true
       this.filtros = {
         searchProduto: '',
       }
     },
 
-    // Drag and Drop
     startDrag(event, produto) {
       if (produto.quantidade === 0 || this.itemJaSelecionado(produto.id)) {
         event.preventDefault()
@@ -502,7 +520,6 @@ export default {
       }
     },
 
-    // Gerenciamento de itens
     adicionarItem(produto) {
       if (produto.quantidade === 0 || this.itemJaSelecionado(produto.id)) {
         return
@@ -531,6 +548,15 @@ export default {
     },
 
     removerItem(index) {
+      const item = this.itensLocacao[index]
+      
+      // Se o item tem produtos_pedido_consumivel_id, significa que veio do banco
+      // Adiciona ao array de itens removidos para deletar no backend
+      if (item.produtos_pedido_consumivel_id) {
+        this.itensRemovidosIds.push(item.produtos_pedido_consumivel_id)
+        console.log('Item marcado para deleção:', item.produtos_pedido_consumivel_id)
+      }
+      
       this.itensLocacao.splice(index, 1)
       this.atualizarStatusProdutos()
     },
@@ -551,7 +577,6 @@ export default {
       }
     },
 
-    // Valida a quantidade enquanto o usuário digita
     validarQuantidade(index) {
       const item = this.itensLocacao[index]
       if (!item) return
@@ -568,25 +593,11 @@ export default {
         quantidade = 1
       }
 
-      // substitui this.$set por splice para manter reatividade no Vue 3
       this.itensLocacao.splice(index, 1, { ...item, qtdParaLocacao: quantidade })
     },
 
-    // Corrige a quantidade quando o campo perde o foco ou pressiona Enter
     corrigirQuantidadeSeNecessario(index) {
-      /* const item = this.itensLocacao[index]
-      if (!item) return
-
-      let quantidade = parseInt(item.qtdParaLocacao) || 1
-
-      if (quantidade < 1) {
-        quantidade = 1
-      } else if (quantidade > item.quantidade) {
-        quantidade = item.quantidade
-        this.mostrarNotificacaoLimite(item.nome, item.quantidade)
-      } */
-
-      // this.itensLocacao.splice(index, 1, { ...item, qtdParaLocacao: quantidade })
+      // Método mantido para compatibilidade com eventos @blur e @keyup.enter
     },
 
     mostrarNotificacaoLimite(nomeItem, limite) {
@@ -606,96 +617,42 @@ export default {
       }
     },
 
-    // Salvamento da locação
-    /*async salvarPedido() { // salvarPedido antiga
+    async salvarOuAtualizarPedido() {
+      if (this.pedidoSelecionadoId !== null) {
+        await this.atualizarPedido()
+      } else {
+        await this.salvarPedido()
+      }
+    },
+
+    async salvarPedido() {
+      if (this.itensLocacao.length === 0) {
+        alert('⚠️ Adicione pelo menos um item à lista antes de salvar.')
+        return
+      }
+
+      if (this.temItensComErro) {
+        alert('⚠️ Corrija as quantidades inválidas antes de salvar.')
+        return
+      }
 
       this.salvando = true
 
       try {
-        const payload = 
-        {
-          itens: this.itensLocacao.map(item => ({
-            id: item.id,
-            qtdParaLocacao: item.qtdParaLocacao,
-            valor_locacao: item.valor_locacao
-          })),
-        }
-
-        let observacao = this.observacoes; // <-- O valor guardado é colocado aqui
-        console.log(observacao);
-        console.log(this.observacoes);
-        // O objeto 'entradaData' é enviado no corpo da requisição POST
-        await axios.post('/criar-pedido-consumivel', {observacao: this.observacoes});
-        await axios.post('/criar_produto_pedido_consumivel', payload);
-        // ...
-        
-
-        
-            /*         this.modalResultado = {
-          mostrar: true,
-          tipo: 'sucesso',
-          titulo: 'Locação Salva com Sucesso!',
-          mensagem: 'A locação foi registrada no sistema e está pronta para uso.',
-          detalhes: {
-            /* cliente: this.dadosEvento.nome,
-            data: this.formatarData(this.dadosEvento.data), *\/
-            totalItens: this.itensLocacao.length,
-            valorTotal: this.valorTotalLocacao.toFixed(2).replace('.', ',')
-          }
-        } *\/
-
-      } catch (error) {
-        console.error('Erro ao salvar pedido:', error)
-
-        this.modalResultado = {
-          mostrar: true,
-          tipo: 'erro',
-          titulo: 'Erro ao Salvar Pedido',
-          mensagem: 'Não foi possível salvar o pedido. Verifique os dados e tente novamente.',
-          detalhes: {
-            erro: error.response?.data?.message || error.message || 'Erro desconhecido'
-          }
-        }
-      } finally {
-        this.salvando = false
-      }
-    }, */
-
-    async salvarPedido() 
-    {
-      // Verificar se há itens selecionados
-      if (this.itensLocacao.length === 0) {
-        alert('⚠️ Adicione pelo menos um item à lista antes de salvar.');
-        return;
-      }
-
-      // Verificar se há erros de quantidade
-      if (this.temItensComErro) {
-        alert('⚠️ Corrija as quantidades inválidas antes de salvar.');
-        return;
-      }
-
-      this.salvando = true;
-
-      try {
-        // Preparar payload com observação e itens
         const payload = {
           observacao: this.observacoes.trim() || null,
           itens: this.itensLocacao.map(item => ({
-            id: parseInt(item.produtos_consumivel_id), // ID do produto consumível
-            quantidade: parseInt(item.qtdParaLocacao), // Quantidade solicitada
-            // valor_locacao: parseFloat(item.valor_locacao) // Valor unitário
+            id: parseInt(item.produtos_consumivel_id),
+            quantidade: parseInt(item.qtdParaLocacao),
           }))
-        };
+        }
 
-        console.log('Enviando payload para criar pedido completo:', payload);
+        console.log('Enviando payload para criar pedido completo:', payload)
 
-        // 1. ÚNICA REQUISIÇÃO: Criar pedido + itens + atualizar estoque
-        const response = await axios.post('/criar-pedido-com-itens-consumivel', payload);
+        const response = await axios.post('/criar-pedido-com-itens-consumivel', payload)
 
-        console.log('Resposta do servidor:', response.data);
+        console.log('Resposta do servidor:', response.data)
 
-        // Mostrar modal de sucesso
         this.modalResultado = {
           mostrar: true,
           tipo: 'sucesso',
@@ -704,32 +661,27 @@ export default {
           detalhes: {
             pedidoId: response.data.pedido_consumivel_id,
             totalItens: this.itensLocacao.length,
-            // valorTotal: this.valorTotalLocacao.toFixed(2).replace('.', ','),
             status: 'Pendente'
           }
-        };
+        }
 
-        // Limpar formulário para novo pedido
-        this.limparFormulario();
+        this.limparFormulario()
 
       } catch (error) {
-        console.error('Erro ao salvar pedido:', error);
+        console.error('Erro ao salvar pedido:', error)
 
-        // Tratar diferentes tipos de erro
-        let mensagemErro = 'Erro desconhecido ao salvar pedido.';
-        let detalhesErro = {};
+        let mensagemErro = 'Erro desconhecido ao salvar pedido.'
+        let detalhesErro = {}
 
         if (error.response?.status === 422) {
-          // Erro de validação
-          mensagemErro = 'Dados inválidos. Verifique os itens selecionados.';
-          detalhesErro = error.response.data.detalhes || {};
+          mensagemErro = 'Dados inválidos. Verifique os itens selecionados.'
+          detalhesErro = error.response.data.detalhes || {}
         } else if (error.response?.data?.erro) {
-          // Erro específico do servidor (ex: estoque insuficiente)
-          mensagemErro = error.response.data.erro;
+          mensagemErro = error.response.data.erro
         } else if (error.response?.status === 500) {
-          mensagemErro = 'Erro interno do servidor. Tente novamente.';
+          mensagemErro = 'Erro interno do servidor. Tente novamente.'
         } else if (error.message) {
-          mensagemErro = error.message;
+          mensagemErro = error.message
         }
 
         this.modalResultado = {
@@ -738,14 +690,99 @@ export default {
           titulo: 'Erro ao Salvar Pedido ❌',
           mensagem: mensagemErro,
           detalhes: detalhesErro
-        };
+        }
 
       } finally {
-        this.salvando = false;
+        this.salvando = false
       }
     },
 
-    // Métodos do modal de resultado
+    async atualizarPedido() {
+      // Permite exclusão: zero itens selecionados, mas há itens removidos
+      if (this.itensLocacao.length === 0 && this.itensRemovidosIds.length === 0) {
+        alert('⚠️ Adicione pelo menos um item à lista antes de atualizar.')
+        return
+      }
+
+      if (this.itensLocacao.length === 0 && this.itensRemovidosIds.length > 0) {
+        if (!confirm('⚠️ Todos os itens serão removidos. Deseja EXCLUIR o pedido permanentemente?')) {
+          return
+        }
+      } else {
+        if (this.temItensComErro) {
+          alert('⚠️ Corrija as quantidades inválidas antes de atualizar.')
+          return
+        }
+        if (!confirm('Deseja realmente atualizar este pedido? Esta ação irá substituir os itens existentes.')) {
+          return
+        }
+      }
+
+      this.salvando = true
+
+      try {
+        const payload = {
+          observacao: this.observacoes.trim() || null,
+          itens: this.itensLocacao.map(item => ({
+            id: parseInt(item.produtos_consumivel_id),
+            quantidade: parseInt(item.qtdParaLocacao),
+          })),
+          itens_deletados: this.itensRemovidosIds
+        }
+
+        const response = await axios.put(`/editar-pedido-consumivel/${this.pedidoSelecionadoId}`, payload)
+
+        if (response.data?.pedido_excluido) {
+          this.modalResultado = {
+            mostrar: true,
+            tipo: 'sucesso',
+            titulo: 'Pedido Excluído com Sucesso! 🗑️',
+            mensagem: 'Todos os itens foram removidos e o pedido foi excluído permanentemente.',
+            detalhes: {
+              pedidoId: this.pedidoSelecionadoId,
+              totalItensRemovidos: this.itensRemovidosIds.length,
+              status: 'Excluído'
+            }
+          }
+        } else {
+          this.modalResultado = {
+            mostrar: true,
+            tipo: 'sucesso',
+            titulo: 'Pedido Atualizado com Sucesso! 🎉',
+            mensagem: 'O pedido foi atualizado e o estoque foi ajustado automaticamente.',
+            detalhes: {
+              pedidoId: this.pedidoSelecionadoId,
+              totalItens: this.itensLocacao.length,
+              itensRemovidos: this.itensRemovidosIds.length,
+              status: 'Atualizado'
+            }
+          }
+        }
+
+        this.limparFormulario()
+
+      } catch (error) {
+        console.error('Erro ao atualizar pedido:', error)
+        let mensagemErro = 'Erro desconhecido ao atualizar pedido.'
+        let detalhesErro = {}
+        if (error.response?.status === 422) {
+          mensagemErro = 'Dados inválidos. Verifique os itens selecionados.'
+          detalhesErro = error.response.data.detalhes || {}
+        } else if (error.response?.data?.erro) {
+          mensagemErro = error.response.data.erro
+        } else if (error.response?.status === 404) {
+          mensagemErro = 'Pedido não encontrado.'
+        } else if (error.response?.status === 500) {
+          mensagemErro = 'Erro interno do servidor. Tente novamente.'
+        } else if (error.message) {
+          mensagemErro = error.message
+        }
+        this.modalResultado = { mostrar: true, tipo: 'erro', titulo: 'Erro ao Atualizar Pedido ❌', mensagem: mensagemErro, detalhes: detalhesErro }
+      } finally {
+        this.salvando = false
+      }
+    },
+
     confirmarModalResultado() {
       this.modalResultado.mostrar = false
       if (this.modalResultado.tipo === 'sucesso') {
@@ -753,20 +790,18 @@ export default {
       }
     },
 
-    // Método auxiliar para limpar o formulário após sucesso
     limparFormulario() {
-      this.observacoes = '';
-      this.itensLocacao = [];
-      this.filtros.searchProduto = '';
-      this.paginaAtual = 1;
+      this.observacoes = ''
+      this.itensLocacao = []
+      this.itensRemovidosIds = [] // Limpa array de itens removidos
+      this.filtros.searchProduto = ''
+      this.paginaAtual = 1
       this.pedidoSelecionadoId = null
-      // Recarregar produtos para refletir estoque atualizado
       this.$nextTick(() => {
-        this.carregarProdutos();
-      });
+        this.carregarProdutos()
+      })
     },
 
-    // Métodos do modal de resultado
     tentarNovamente() {
       this.modalResultado.mostrar = false
     },
@@ -778,22 +813,19 @@ export default {
     },
 
     async carregarProdutos() {
-      // if (!this.dadosEvento.data) return
       this.carregando = true
 
       try {
         const params = {
           page: this.paginaAtual,
-          per_page: this.itensPorPagina/* ,
-          data_inicio: this.dadosEvento.data,
-          data_fim: this.dadosEvento.dataRetorno */
+          per_page: this.itensPorPagina
         }
 
         if (this.filtros.searchProduto && this.filtros.searchProduto.trim()) {
           params.nome = this.filtros.searchProduto.trim()
         }
 
-        const response = await axios.get('/produtos-consumivel', { params } )
+        const response = await axios.get('/produtos-consumivel', { params })
         console.log('Resposta dos produtos:', response.data)
 
         this.produtos = Array.isArray(response.data.data) ? response.data.data : []
@@ -832,17 +864,17 @@ export default {
     },
 
     async buscarPedidos() {
-      this.carregando = true;
-      this.error = null;
+      this.carregando = true
+      this.error = null
       
       try {
-        const response = await axios.get('/pedido-consumivel');
-        this.pedidos = response.data.data || [];
+        const response = await axios.get('/pedido-consumivel')
+        this.pedidos = response.data.data || []
       } catch (error) {
-        console.error("Erro ao buscar pedidos:", error);
-        this.error = "Não foi possível carregar os pedidos. Tente novamente mais tarde.";
+        console.error("Erro ao buscar pedidos:", error)
+        this.error = "Não foi possível carregar os pedidos. Tente novamente mais tarde."
       } finally {
-        this.carregando = false;
+        this.carregando = false
       }
     },
 
@@ -863,14 +895,9 @@ export default {
         const itens = Array.isArray(pedidoDetalhe.itens) ? pedidoDetalhe.itens : []
         this.itensLocacao = this.mapItensPedidoParaItensLocacao(itens)
       
-        
         this.observacoes = pedidoDetalhe.observacoes || ''
         this.pedidoSelecionadoId = pedidoDetalhe.id || pedidoDetalhe.pedido_consumivel_id || null
-
-        // opcional: preencher observações do pedido
-        /*if (pedidoDetalhe.observacao && !this.observacoes) {
-          this.observacoes = pedidoDetalhe.observacao
-        } */
+        this.itensRemovidosIds = [] // Reseta array de itens removidos ao carregar novo pedido
 
         this.$nextTick(() => this.atualizarStatusProdutos())
       } catch (e) {
@@ -879,35 +906,6 @@ export default {
       } finally {
         this.mostrarModalHistorico = false
       }
-    },
-
-    // Método auxiliar para limpar o formulário após sucesso
-    limparFormulario() {
-      this.itensLocacao = []
-      this.observacoes = ''
-      this.pedidoSelecionadoId = null
-    },
-
-    novoEvento() {
-      this.dadosEvento = {
-        nome: '',
-        contato: '',
-        evento: '',
-        data: '',
-        dataRetorno: null,
-      }
-      this.itensLocacao = []
-      this.observacoes = ''
-      this.pedidoSelecionadoId = null
-      this.filtros = {
-        searchProduto: '',
-      }
-    },
-
-    cancelarEvento() {
-      this.mostrarModalEvento = false
-      this.$router.push('/consumivel')
-      this.pedidoSelecionadoId = null
     },
 
     mapItensPedidoParaItensLocacao(itens) {
@@ -922,6 +920,7 @@ export default {
         return {
           id: produtoId,
           produtos_consumivel_id: produtoId,
+          produtos_pedido_consumivel_id: i.produtos_pedido_consumivel_id || null, // ID do item no banco
           nome: produto.nome || i.nome || `Produto ${produtoId}`,
           foto: produto.foto || null,
           quantidade: isNaN(estoqueDisponivel) ? qtdSolicitada : estoqueDisponivel,
@@ -933,29 +932,25 @@ export default {
     },
 
     limparDados() {
-      // Limpa o ID do pedido selecionado
-      this.pedidoSelecionadoId = null
-    
-      // Limpa as observações
-      this.observacoes = ''
-    
-      // Limpa a lista de itens
-      this.itensLocacao = []
-    
-      // Atualiza o status dos produtos
-      this.atualizarStatusProdutos()
-    
-      // Opcional: mostrar uma notificação de confirmação
-      console.log('Dados limpos com sucesso')
+      if (this.itensLocacao.length > 0 || this.observacoes || this.pedidoSelecionadoId !== null) {
+        if (confirm('Deseja realmente limpar todos os dados do formulário?')) {
+          this.pedidoSelecionadoId = null
+          this.observacoes = ''
+          this.itensLocacao = []
+          this.itensRemovidosIds = [] // Limpa array de itens removidos
+          this.atualizarStatusProdutos()
+          console.log('Dados limpos com sucesso')
+        }
+      }
     },
   },
   mounted() {
-    this.carregarProdutos();
-    this.buscarPedidos();
+    this.carregarProdutos()
+    this.buscarPedidos()
   },
 
   beforeUnmount() {
-  this.limparTimeouts()
+    this.limparTimeouts()
   }
 }
 </script>

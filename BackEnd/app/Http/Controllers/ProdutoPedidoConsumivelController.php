@@ -151,16 +151,125 @@ class ProdutoPedidoConsumivelController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ProdutoPedidoConsumivel $produtoPedidoConsumivel)
+    public function update(Request $request, int $id)
     {
-        //
+        try {
+            $validated = $request->validate([
+                'pedido_consumivel_id'   => 'sometimes|integer|exists:pedido_consumivel,pedido_consumivel_id',
+                'produtos_consumivel_id' => 'sometimes|integer|exists:produtos_consumivel,produtos_consumivel_id',
+                'quantidade'             => 'required|integer|min:1',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Falha de validação ao atualizar item do pedido', [
+                'errors'  => $e->errors(),
+                'request' => $request->all(),
+            ]);
+            throw $e;
+        }
+
+        try {
+            $itemAtualizado = DB::transaction(function () use ($id, $validated) {
+                // Bloqueia o registro para evitar condições de corrida
+                $item = ProdutoPedidoConsumivel::lockForUpdate()->findOrFail($id);
+
+                $novoPedidoId  = $validated['pedido_consumivel_id']   ?? $item->pedido_consumivel_id;
+                $novoProdutoId = $validated['produtos_consumivel_id'] ?? $item->produtos_consumivel_id;
+                $novaQtd       = $validated['quantidade']             ?? $item->quantidade;
+
+                // Se o produto foi alterado, devolve estoque do antigo e desconta do novo
+                if ((int) $novoProdutoId !== (int) $item->produtos_consumivel_id) {
+                    // Devolve a quantidade antiga ao produto anterior
+                    $produtoAntigo = ProdutoConsumivel::lockForUpdate()->findOrFail($item->produtos_consumivel_id);
+                    $produtoAntigo->quantidade += (int) $item->quantidade;
+                    $produtoAntigo->save();
+
+                    // Desconta a nova quantidade do novo produto
+                    $produtoNovo = ProdutoConsumivel::lockForUpdate()->findOrFail($novoProdutoId);
+                    if ($produtoNovo->quantidade < $novaQtd) {
+                        throw new \Exception('Estoque insuficiente para o novo produto selecionado.');
+                    }
+                    $produtoNovo->quantidade -= $novaQtd;
+                    $produtoNovo->save();
+
+                    // Atualiza o item do pedido
+                    $item->pedido_consumivel_id   = $novoPedidoId;
+                    $item->produtos_consumivel_id = $novoProdutoId;
+                    $item->quantidade             = $novaQtd;
+                    $item->save();
+                } else {
+                    // Mesmo produto: ajusta estoque apenas pela diferença
+                    $produto = ProdutoConsumivel::lockForUpdate()->findOrFail($novoProdutoId);
+                    $delta = (int) $novaQtd - (int) $item->quantidade;
+
+                    if ($delta > 0) {
+                        if ($produto->quantidade < $delta) {
+                            throw new \Exception('Estoque insuficiente para aumentar a quantidade.');
+                        }
+                        $produto->quantidade -= $delta;
+                        $produto->save();
+                    } elseif ($delta < 0) {
+                        $produto->quantidade += abs($delta);
+                        $produto->save();
+                    }
+
+                    // Atualiza o item do pedido
+                    $item->pedido_consumivel_id = $novoPedidoId;
+                    $item->quantidade           = $novaQtd;
+                    $item->save();
+                }
+
+                return $item->fresh();
+            });
+
+            return response()->json([
+                'mensagem' => 'Item do pedido atualizado com sucesso!',
+                'item'     => $itemAtualizado,
+            ], 200);
+        } catch (\Throwable $e) {
+            Log::error('Erro ao atualizar item do pedido: ' . $e->getMessage(), [
+                'stack' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json(['erro' => $e->getMessage()], 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ProdutoPedidoConsumivel $produtoPedidoConsumivel)
+    public function destroy(int $id)
     {
-        //
+        try {
+            DB::transaction(function () use ($id) {
+                // Bloqueia o registro para evitar condições de corrida
+                $item = ProdutoPedidoConsumivel::lockForUpdate()->findOrFail($id);
+
+                // Devolve a quantidade ao estoque do produto
+                $produto = ProdutoConsumivel::lockForUpdate()->findOrFail($item->produtos_consumivel_id);
+                $produto->quantidade += (int) $item->quantidade;
+                $produto->save();
+
+                // Deleta o item do pedido
+                $item->delete();
+
+                Log::info('Item do pedido deletado e estoque devolvido', [
+                    'item_id' => $id,
+                    'produto_id' => $item->produtos_consumivel_id,
+                    'quantidade_devolvida' => $item->quantidade,
+                ]);
+            });
+
+            return response()->json([
+                'mensagem' => 'Item removido do pedido e estoque atualizado com sucesso!',
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::warning('Item do pedido não encontrado para deleção', ['id' => $id]);
+            return response()->json(['erro' => 'Item não encontrado.'], 404);
+        } catch (\Throwable $e) {
+            Log::error('Erro ao deletar item do pedido: ' . $e->getMessage(), [
+                'stack' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['erro' => $e->getMessage()], 500);
+        }
     }
 }

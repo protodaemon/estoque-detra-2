@@ -11,6 +11,8 @@ import PedidosConsumivel from '../pages/PedidosConsumivel.vue';
 import CriarPedido from '../pages/CriarPedido.vue';
 import MenuEntradasConsumivel from '../pages/MenuEntradasConsumivel.vue';
 import MenuSaidaConsumivel from '../pages/MenuSaidaConsumivel.vue';
+import MenuPedidosConsumivel from '../pages/MenuPedidosConsumivel.vue';
+import ConsultaPedidos from '../pages/ConsultaPedidos.vue';
 
 
 
@@ -73,7 +75,17 @@ const routes = [
     path: '/menu-saida-consumivel',
     name: 'menu-saida-consumivel',
     component: MenuSaidaConsumivel
-  }
+  },
+  {
+    path: '/menu-pedidos',
+    name: 'menu-pedidos',
+    component: MenuPedidosConsumivel
+  },
+  {
+    path: '/consultar-pedido',
+    name: 'consultar-pedido',
+    component: ConsultaPedidos
+  },
 ];
 
 const router = createRouter({
