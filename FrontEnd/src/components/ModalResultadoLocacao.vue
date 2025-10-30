@@ -130,13 +130,13 @@ export default {
   computed: {
     tituloComputado() {
       if (this.titulo) return this.titulo
-      return this.tipo === 'sucesso' ? 'Locação Salva!' : 'Erro ao Salvar'
+      return this.tipo === 'sucesso' ? 'Pedido Salvo!' : 'Erro ao Salvar'
     },
     mensagemComputada() {
       if (this.mensagem) return this.mensagem
       return this.tipo === 'sucesso' 
-        ? 'A locação foi salva com sucesso no sistema.'
-        : 'Ocorreu um erro ao tentar salvar a locação.'
+        ? 'O pedido foi salva com sucesso no sistema.'
+        : 'Ocorreu um erro ao tentar salvar o pedido.'
     }
   },
   emits: ['confirmar', 'acao-secundaria'],
