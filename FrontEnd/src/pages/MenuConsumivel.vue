@@ -143,9 +143,9 @@ export default {
         },
         {
           titulo: 'Realizar Pedido',
-          rota: '/criar-pedido',
+          rota: '/menu-pedidos',
           icone: 'Inbox',
-          descricao: "Novo pedido de produtos para consumo",
+          descricao: "Gerenciar pedidos de produtos para consumo",
           cor: 'blue',
           badge: null
         }

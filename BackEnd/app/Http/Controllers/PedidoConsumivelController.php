@@ -156,44 +156,158 @@ class PedidoConsumivelController extends Controller
 
 
 
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
-        $pedido = PedidoConsumivel::findOrFail($id);
-
-        $request->validate([
-            'status'            => 'nullable|string|max:12|in:pendente,aprovado,cancelado,concluído',
-            'data_alteracao'    => 'nullable|date',
-            'observacoes'       => 'nullable|string|max:500'
-        ]);
-
-        if ($request->has('status')) {
-            $pedido->status = $request->status;
+        try {
+            $validated = $request->validate([
+                'observacao' => 'nullable|string|max:500',
+                'itens' => 'nullable|array',
+                'itens.*.id' => 'required_with:itens|integer|exists:produtos_consumivel,produtos_consumivel_id',
+                'itens.*.quantidade' => 'required_with:itens|integer|min:1',
+                'itens_deletados' => 'nullable|array',
+                'itens_deletados.*' => 'integer|exists:produtos_pedido_consumivel,produtos_pedido_consumivel_id',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Falha de validação ao atualizar pedido', [
+                'errors' => $e->errors(),
+                'request' => $request->all(),
+            ]);
+            return response()->json([
+                'erro' => 'Dados inválidos.',
+                'detalhes' => $e->errors(),
+            ], 422);
         }
 
-        // Inserindo a data atualização com a data que a alteração foi feita
-        $pedido->data_alteracao = now();
+        try {
+            $resultado = DB::transaction(function () use ($id, $validated) {
+                $pedido = PedidoConsumivel::lockForUpdate()->findOrFail($id);
 
-        if ($request->has('observacoes')) {
-            $pedido->observacoes = $request->observacoes;
+                // Remoção de itens marcados para exclusão (devolve estoque)
+                if (!empty($validated['itens_deletados'])) {
+                    foreach ($validated['itens_deletados'] as $itemId) {
+                        $item = ProdutoPedidoConsumivel::lockForUpdate()->find($itemId);
+                        if ($item && $item->pedido_consumivel_id == $id) {
+                            $produto = ProdutoConsumivel::lockForUpdate()->findOrFail($item->produtos_consumivel_id);
+                            $produto->quantidade += (int) $item->quantidade;
+                            $produto->save();
+                            $item->delete();
+                            Log::info('Item deletado ao atualizar pedido', ['item_id' => $itemId]);
+                        }
+                    }
+                }
+
+                // Itens atuais após exclusões
+                $itensAtuais = ProdutoPedidoConsumivel::where('pedido_consumivel_id', $id)->get();
+                $itensAtuaisMap = $itensAtuais->keyBy('produtos_consumivel_id');
+
+                // Se nenhum item novo foi enviado e não sobraram itens, sinaliza exclusão
+                $itensNovos = $validated['itens'] ?? [];
+                if ($itensAtuaisMap->isEmpty() && empty($itensNovos)) {
+                    Log::info('Pedido sem itens após edição - será excluído', ['pedido_id' => $id]);
+                    return ['tipo' => 'excluir'];
+                }
+
+                // Atualiza observações
+                if (isset($validated['observacao'])) {
+                    $pedido->observacoes = $validated['observacao'];
+                    $pedido->save();
+                }
+
+                // Processa itens novos/alterados
+                foreach ($itensNovos as $itemData) {
+                    $produtoId = (int) $itemData['id'];
+                    $qtdNova = (int) $itemData['quantidade'];
+
+                    if ($itensAtuaisMap->has($produtoId)) {
+                        $itemExistente = $itensAtuaisMap->get($produtoId);
+                        $produto = ProdutoConsumivel::lockForUpdate()->findOrFail($produtoId);
+                        $delta = $qtdNova - (int) $itemExistente->quantidade;
+
+                        if ($delta > 0) {
+                            if ($produto->quantidade < $delta) {
+                                throw new \Exception("Estoque insuficiente para {$produto->nome}.");
+                            }
+                            $produto->quantidade -= $delta;
+                        } elseif ($delta < 0) {
+                            $produto->quantidade += abs($delta);
+                        }
+                        $produto->save();
+
+                        $itemExistente->quantidade = $qtdNova;
+                        $itemExistente->save();
+                    } else {
+                        $produto = ProdutoConsumivel::lockForUpdate()->findOrFail($produtoId);
+                        if ($produto->quantidade < $qtdNova) {
+                            throw new \Exception("Estoque insuficiente para {$produto->nome}.");
+                        }
+
+                        ProdutoPedidoConsumivel::create([
+                            'pedido_consumivel_id' => $id,
+                            'produtos_consumivel_id' => $produtoId,
+                            'quantidade' => $qtdNova,
+                        ]);
+
+                        $produto->quantidade -= $qtdNova;
+                        $produto->save();
+                    }
+                }
+
+                return [
+                    'tipo' => 'atualizado',
+                    'pedido' => $pedido->fresh()->load('itens.produto')
+                ];
+            });
+
+            // Se ficou sem itens, usa a função delete do controller
+            if ($resultado['tipo'] === 'excluir') {
+                return $this->delete($id);
+            }
+
+            return response()->json([
+                'mensagem' => 'Pedido atualizado com sucesso!',
+                'pedido_excluido' => false,
+                'pedido_consumivel_id' => $resultado['pedido']->pedido_consumivel_id,
+                'pedido' => $resultado['pedido'],
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['erro' => 'Pedido não encontrado.'], 404);
+        } catch (\Throwable $e) {
+            Log::error('Erro ao atualizar pedido: ' . $e->getMessage(), ['stack' => $e->getTraceAsString()]);
+            return response()->json(['erro' => 'Falha ao atualizar pedido.'], 500);
         }
-
-        $pedido->save();
-
-        return response()->json([
-            'mensagem' => 'Observação atualizada com sucesso',
-            'pedido_consumivel_id' => $pedido->pedido_consumivel_id
-        ], 200);
     }
 
     public function delete($id)
     {
-        $pedido = PedidoConsumivel::findOrFail($id);
+        try {
+            DB::transaction(function () use ($id) {
+                $pedido = PedidoConsumivel::lockForUpdate()->findOrFail($id);
 
-        $pedido->data_cancelamento = now();
+                // Devolve estoque e remove itens
+                $itens = ProdutoPedidoConsumivel::where('pedido_consumivel_id', $id)->lockForUpdate()->get();
+                foreach ($itens as $item) {
+                    $produto = ProdutoConsumivel::lockForUpdate()->findOrFail($item->produtos_consumivel_id);
+                    $produto->quantidade += (int) $item->quantidade;
+                    $produto->save();
+                    $item->delete();
+                }
 
-        return response()->json([
-            'mensagem' => 'Pedido excluído com sucesso.'
-        ], 200);
+                // Exclui o pedido
+                $pedido->delete();
+            });
+
+            return response()->json([
+                'mensagem' => 'Pedido excluído com sucesso!',
+                'pedido_excluido' => true,
+                'pedido_consumivel_id' => (int) $id,
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['erro' => 'Pedido não encontrado.'], 404);
+        } catch (\Throwable $e) {
+            Log::error('Erro ao excluir pedido: ' . $e->getMessage(), ['stack' => $e->getTraceAsString()]);
+            return response()->json(['erro' => 'Falha ao excluir pedido.'], 500);
+        }
     }
 
     public function iniciarPedido(Request $request)
