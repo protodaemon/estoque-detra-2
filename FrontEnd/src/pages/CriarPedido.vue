@@ -24,7 +24,7 @@
       :mensagem="modalResultado.mensagem" 
       :detalhes="modalResultado.detalhes"
       :mostrarBotaoSecundario="modalResultado.tipo === 'erro'"
-      :textoBotaoPrincipal="modalResultado.tipo === 'sucesso' ? 'Nova Locação' : 'OK'"
+      :textoBotaoPrincipal="modalResultado.tipo === 'sucesso' ? 'Novo Pedido' : 'OK'"
       :textoBotaoSecundario="'Cancelar'" @confirmar="confirmarModalResultado" @acao-secundaria="tentarNovamente"
       @voltar-menu="this.$router.push('/consumivel')" 
     />
@@ -184,38 +184,38 @@
 
               <div class="space-y-2">
                 <div class="flex gap-2 items-center">
-                  <button @click="diminuirQuantidade(index)"
-                    class="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-bold text-gray-600 transition-colors flex items-center justify-center">
+                  <button @click="diminuirQuantidade(index)" :disabled="item.qtdPedido <= 1"
+                    class="w-8 h-8 bg-red-100 hover:bg-red-200 disabled:bg-gray-200 disabled:text-gray-400 rounded-lg text-sm font-bold text-red-600 transition-colors flex items-center justify-center">
                     -
                   </button>
-                  <input v-model.number="item.qtdPedido" type="number" min="1" :max="item.quantidade"
+
+                  <input  
+                    v-model.number="item.qtdPedido" type="number"
+                    :min = "[pedidoSelecionadoId == null ? 1 : -99999]"
+                    :max="[pedidoSelecionadoId == null ? item.quantidade : 99999]" 
                     class="flex-1 px-3 py-2 border rounded-lg text-sm text-center transition-all"
                     :class="[
                       (temErroQuantidade(item) && pedidoSelecionadoId == null)
                         ? 'border-red-500 bg-red-50 focus:ring-red-300 focus:border-red-500'
                         : 'border-gray-300 focus:ring-blue-300 focus:border-transparent'
                     ]"
+                    onclick= "this.select()"
                     @input="validarQuantidade(index)" 
                     @blur="corrigirQuantidadeSeNecessario(index)"
                     @keyup.enter="corrigirQuantidadeSeNecessario(index)" 
                   />
-<!--                   <input v-else-if="pedidoSelecionadoId !== null" v-model.number="item.qtdPedidoReservado" type="number" min="1" :max="item.quantidade"
-                    class="flex-1 px-3 py-2 border rounded-lg text-sm text-center transition-all"
-                    :class="[
-                      temErroQuantidade(item)
-                        ? 'border-red-500 bg-red-50 focus:ring-red-300 focus:border-red-500'
-                        : 'border-gray-300 focus:ring-blue-300 focus:border-transparent'
-                    ]"
-                    @input="validarQuantidade(index)" 
-                    @blur="corrigirQuantidadeSeNecessario(index)"
-                    @keyup.enter="corrigirQuantidadeSeNecessario(index)" 
-                  /> -->
-                  <button @click="aumentarQuantidade(index)" :disabled="item.qtdPedido >= item.quantidade"
+
+                  <button @click="aumentarQuantidade(index)" :disabled="!podeAumentarQuantidade(index)" 
                     class="w-8 h-8 bg-blue-200 hover:bg-blue-300 disabled:bg-gray-200 disabled:text-gray-400 rounded-lg text-sm font-bold text-blue-700 transition-colors flex items-center justify-center">
                     +
                   </button>
+                  <button @click="logger(index)"  
+                    class="w-8 h-8 bg-blue-200 hover:bg-blue-300 disabled:bg-gray-200 disabled:text-gray-400 rounded-lg text-sm font-bold text-blue-700 transition-colors flex items-center justify-center">
+                    |||
+                  </button>
                 </div>
-
+                
+                <!-- retornar input jamba -->
                 <div v-if="temErroQuantidade(item) && pedidoSelecionadoId == null" class="text-xs text-red-600 font-medium">
                   Máximo disponível: {{ item.quantidade }}
                 </div>
@@ -223,8 +223,8 @@
                 <div v-if="pedidoSelecionadoId == null" class="text-xs text-gray-500 text-center">
                   {{ item.qtdPedido }} de {{ item.quantidade }} disponíveis
                 </div>
-                <div v-else-if="pedidoSelecionadoId !== null" class="text-xs text-gray-500 text-center">
-                  {{ item.qtdPedidoReservado }} de {{ item.quantidade }} disponíveis
+                <div v-else-if="pedidoSelecionadoId !== null && item.qtdPedidoDiferença > 0" class="text-xs text-gray-500 text-center" >
+                  {{ item.qtdPedidoDiferença }} de {{ item.quantidade }} disponíveis
                 </div>
               </div>
 
@@ -375,6 +375,21 @@
                 </svg>
                 {{ salvando ? 'Salvando...' : (pedidoSelecionadoId !== null ? 'Atualizar Pedido' : 'Salvar Pedido') }}
               </button>
+              
+              <button
+                @click="logger()"
+                :disabled="salvando || (itensPedido.length === 0 && this.itensRemovidosIds.length <= 0) || temItensComErro" 
+                :class="[
+                  'text-white font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 hover:shadow-xl flex items-center gap-2',
+                  pedidoSelecionadoId !== null 
+                    ? 'bg-orange-600 hover:bg-orange-700' 
+                    : 'bg-blue-600 hover:bg-blue-700',
+                  (salvando || (itensPedido.length === 0 && this.itensRemovidosIds.length <= 0) || temItensComErro) ? 'opacity-50 cursor-not-allowed' : ''
+                ]"
+              >
+              Jambao
+              </button>
+            
             </div>
           </div>
         </div>
@@ -443,6 +458,7 @@ export default {
     },
 
     temItensComErro() {
+      console.log('tem itens cm error?? - ' + this.itensPedido.some(item => this.temErroQuantidade(item)))
       return this.itensPedido.some(item => this.temErroQuantidade(item))
     }
   },
@@ -460,22 +476,28 @@ export default {
   },
 
   methods: {
-    temErroQuantidade(item) {
-      if (!item || !item.qtdPedido || !item.quantidade) return false
-      const disponivel = Number.parseInt(item.quantidade, 10)
+    logger(index, log) {
+      if (log = 1) 
+      {
+        console.log('pode aumentar quantidade? - ', this.podeAumentarQuantidade(index));
+      }
+      else if (log = 2)
+      {
+        console.log('tem items com erro?' + this.temItensComErro)
+      }
+    },
 
-      const qtd = Number.parseInt
-      (
-        (this.pedidoSelecionadoId !== null)
-          ? quantidade = item.qtdPedido
-          : delta = disponivel - item.qtdPedido
-        ,10
-      )
+    temErroQuantidade(item) 
+    { //jamba
+      if (!item || !item.qtdPedido || !item.quantidade) return false;
+      const disponivel = Number.parseInt(item.quantidade, 10);
+      let quantidade = Number.parseInt(item.qtdPedido, 10);
+      // console.log('temerroqtd ' + quantidade);
 
-      return $quantidade <= 0 ||
-        $quantidade > disponivel ||
+      return quantidade <= 0 ||
+        ( (quantidade > disponivel && this.pedidoSelecionadoId == null) || (item.qtdPedidoDiferenca > disponivel && this.pedidoSelecionadoId !== null) ) ||
         !Number.isInteger(quantidade) ||
-        isNaN(quantidade)
+        isNaN(quantidade);
     },
 
     confirmarEvento(dados) {
@@ -581,18 +603,42 @@ export default {
       this.atualizarStatusProdutos()
     },
 
+    podeAumentarQuantidade(index) {
+      const item = this.itensPedido[index]
+      let qtdPedidoDiferenca = isNaN(item.qtdPedidoDiferença) ? 0 : item.qtdPedidoDiferença
+      console.log('podeAumentarQuantidade chamado para item index ' + index + ' com qtdPedidoDiferenca ' + qtdPedidoDiferenca + ' e id ' + this.pedidoSelecionadoId);
+      return (
+        (item.qtdPedido < item.quantidade && this.pedidoSelecionadoId == null) ||
+        (this.pedidoSelecionadoId !== null &&
+          (item.qtdPedidoDiferença < item.quantidade || qtdPedidoDiferenca <= 0))
+      )
+    },
+
     aumentarQuantidade(index) {
       const item = this.itensPedido[index]
-      if (item && item.qtdPedido < item.quantidade) {
+      let qtdPedidoDiferenca = isNaN(item.qtdPedidoDiferença) ? 0 : item.qtdPedidoDiferença
+
+      console.log('inicio aumentarQuantidade logs')
+      console.log('acessou aumentarQuantidade');
+      console.log('podeAumentarQuantidade - ' + this.podeAumentarQuantidade(index) + " - item:" + item);
+      console.log('valor de qtdPedidoDiferença ' + (isNaN(item.qtdPedidoDiferença) ? 0 : item.qtdPedidoDiferença));
+      console.log('fim aumentarQuantidade logs')
+
+      if (item && this.podeAumentarQuantidade(index)) {
         item.qtdPedido++
+        item.qtdPedidoDiferença++
+        console.log('aumentarQuantidade ' + item.qtdPedidoDiferença);
         this.$forceUpdate()
       }
     },
 
     diminuirQuantidade(index) {
       const item = this.itensPedido[index]
+      let qtdPedidoDiferenca = isNaN(item.qtdPedidoDiferença) ? 0 : item.qtdPedidoDiferença
       if (item && item.qtdPedido > 1) {
         item.qtdPedido--
+        item.qtdPedidoDiferença--
+        console.log('diminuirQuantidade ' + item.qtdPedidoDiferença);
         this.$forceUpdate()
       }
     },
@@ -946,6 +992,8 @@ export default {
           quantidade: isNaN(estoqueDisponivel) ? qtdSolicitada : estoqueDisponivel,
           qtdPedido: isNaN(qtdSolicitada) ? 1 : qtdSolicitada,
           qtdPedidoReservado: isNaN(qtdSolicitada) ? 1 : qtdSolicitada,
+          // Ao editar o produto, variavel captura quanto vai ser adicionado/removido ao item, pra checar se tem no estoque
+          qtdPedidoDiferença: 0,
           valor_locacao: produto.valor_locacao ?? i.valor_locacao ?? 0,
           uniqueId: Date.now() + Math.random()
         }
@@ -1082,6 +1130,26 @@ button:not(:disabled):active {
 .cursor-move:active {
   cursor: grabbing;
 }
+ 
+/*  */
+/* Remove arrows (Chrome, Safari, Edge, Opera) */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove arrows (Firefox) */
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+/* Normalize appearance */
+/* input {
+  appearance: textfield;
+} */
+/*  */
 
 @media (max-width: 768px) {
   .card-base:hover {
