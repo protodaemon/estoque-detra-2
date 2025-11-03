@@ -2,34 +2,6 @@
 
 namespace App\Models;
 
-/* namespace App\Models;
-<!-- <!-?php
-use Illuminate\Database\Eloquent\Model;
-
-class PedidoConsumivel extends Model
-{
-    protected $table = 'pedido_consumivel';
-    protected $primaryKey = 'pedido_consumivel_id';
-    public $timestamps = false;
-
-    protected $fillable = [
-        'pedido_consumivel_id',
-        'status',
-        'data_pedido',
-        'data_cancelamento',
-        'data_alteração',
-        'observacoes'
-    ];
-    
-    public function itens()
-    {
-        // Um pedido tem muitos 'ProdutoPedidoConsumivel'
-        return $this->hasMany(ProdutoPedidoConsumivel::class, 'pedido_consumivel_id');
-    } 
-}*/
-
-
-
 use Illuminate\Database\Eloquent\Model;
 
 class PedidoConsumivel extends Model
@@ -48,13 +20,16 @@ class PedidoConsumivel extends Model
         'status',
         'data_pedido',
         'data_cancelamento',
-        'data_alteracao', // Corrigido: era 'data_alteração'
-        'observacoes'
+        'data_confirmacao',
+        'data_alteracao',
+        'observacoes',
+        'observacao_cancelamento'
     ];
     
     protected $casts = [
         'data_pedido' => 'datetime',
         'data_cancelamento' => 'datetime',
+        'data_confirmacao' => 'datetime',
         'data_alteracao' => 'datetime'
     ];
     

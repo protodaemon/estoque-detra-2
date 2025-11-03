@@ -9,9 +9,8 @@
               <ArrowLeft class="w-5 h-5" />
             </button>
             <div>
-              <h1 class="text-2xl font-bold text-gray-800">Gerenciamento de Entradas</h1>
+              <h1 class="text-2xl font-bold text-gray-800">Gerenciamento de Pedidos</h1>
               
-              <!-- Breadcrumbs -->
               <div class="flex items-center text-sm text-gray-600 mt-1 space-x-2">
                 <span class="text-gray-400">Menu</span>
                 <ChevronRight class="w-4 h-4" />
@@ -65,16 +64,19 @@
               </div>
               <div class="text-sm flex items-center justify-between">
                 <span class="px-2 py-1 rounded-full"
-                      :class="(pedido.status || 'Pendente') === 'Pendente' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'">
-                  {{ pedido.status || 'Pendente' }}
+                      :class="{
+                        'bg-yellow-100 text-yellow-700': pedido.status === 'pendente',
+                        'bg-green-100 text-green-700': pedido.status === 'concluido',
+                        'bg-red-100 text-red-700': pedido.status === 'cancelado',
+                        'bg-blue-100 text-blue-700': !pedido.status || (pedido.status !== 'pendente' && pedido.status !== 'concluido' && pedido.status !== 'cancelado')
+                      }">
+                  {{ pedido.status || 'pendente' }}
                 </span>
                 <ChevronDown v-if="pedidoExpandido !== (pedido.id || pedido.pedido_consumivel_id)"
                   class="w-4 h-4 text-gray-400 transition-transform"
-                  :class="{ 'rotate-180': pedidoExpandido === (pedido.id || pedido.pedido_consumivel_id) }"
                 />
                 <ChevronUp v-if="pedidoExpandido === (pedido.id || pedido.pedido_consumivel_id)"
                   class="w-4 h-4 text-gray-400 transition-transform"
-                  :class="{ 'rotate-180': pedidoExpandido === (pedido.id || pedido.pedido_consumivel_id) }"
                 />
               </div>
             </button>
@@ -83,7 +85,7 @@
             <transition name="expand">
               <div 
                 v-if="pedidoExpandido === (pedido.id || pedido.pedido_consumivel_id)"
-                class="bg-gray-150 border-b border-gray-200 p-6"
+                class="bg-gray-50 border-b border-gray-200 p-6"
               >
                 <div class="mb-4">
                   <div class="flex gap-4 mb-4">
@@ -110,6 +112,30 @@
                       />
                     </div>
                   </div>
+
+                  <!-- Informações de data baseadas no status -->
+                  <div v-if="pedido.status === 'cancelado'" class="mb-4">
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <p v-if="pedido.data_cancelamento" class="text-sm font-medium text-red-800 mb-1">
+                        <span class="font-bold">Cancelado em:</span> {{ formatarDataHora(pedido.data_cancelamento) }}
+                      </p>
+                      <p v-if="pedido.observacao_cancelamento" class="text-sm text-red-700">
+                        <span class="font-bold">Motivo:</span> {{ pedido.observacao_cancelamento }}
+                      </p>
+                      <p v-else class="text-sm text-red-600 italic">
+                        Sem motivo informado
+                      </p>
+                    </div>
+                  </div>
+
+                  <div v-if="pedido.status === 'concluido'" class="mb-4">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <p v-if="pedido.data_confirmacao" class="text-sm font-medium text-green-800">
+                        <span class="font-bold">Confirmado em:</span> {{ formatarDataHora(pedido.data_confirmacao) }}
+                      </p>
+                    </div>
+                  </div>
+
                 </div>
 
                 <!-- Lista de itens do pedido -->
@@ -124,9 +150,8 @@
                     <div 
                       v-for="item in itensPedido" 
                       :key="item.id"
-                      class="bg-white shadow-md p-4 rounded-xl border border-gray-500"
+                      class="bg-white shadow-md p-4 rounded-xl border border-gray-300"
                     >
-                      <!-- Imagem do produto -->
                       <div class="relative bg-gray-50 rounded-xl mb-3 overflow-hidden" style="height: 150px;">
                         <template v-if="item.foto">
                           <img :src="item.foto" :alt="item.nome" class="w-full h-full object-cover" />
@@ -146,10 +171,7 @@
                         </div>
                       </div>
 
-                      <!-- Nome do produto -->
                       <h5 class="text-sm font-bold text-blue-700 mb-1 leading-tight">{{ item.nome }}</h5>
-                      
-                      <!-- ID do produto -->
                       <p class="text-xs text-gray-500">ID: {{ item.produtos_consumivel_id || item.id }}</p>
                     </div>
                   </div>
@@ -158,6 +180,26 @@
                 <div v-else class="text-center py-8">
                   <p class="text-gray-500">Nenhum item encontrado neste pedido</p>
                 </div>
+                <br></br>
+
+                                  <!-- Botões de Ação -->
+                <div v-if="pedido.status === 'pendente'" class="flex gap-3 mb-4">
+                  <button
+                    @click="confirmarPedido(pedido)"
+                    :disabled="processando"
+                    class="flex px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 font-medium"
+                  >
+                    ✓ Confirmar Pedido
+                  </button>
+                  <button
+                    @click="abrirModalCancelarPedido(pedido)"
+                    :disabled="processando"
+                    class="flex px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 font-medium"
+                  >
+                    ✕ Cancelar Pedido
+                  </button>
+                </div>
+
               </div>
             </transition>
           </template>
@@ -178,23 +220,37 @@
         Fechar
       </button>
     </div>
+
+    <!-- Modal de Cancelamento -->
+    <ModalCancelarPedido
+      :mostrar="modalCancelamento.mostrar"
+      :pedido-id="modalCancelamento.pedidoId"
+      @fechar="modalCancelamento.mostrar = false"
+      @confirmar="handleCancelarPedido"
+    />
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 import { History, ChevronRight, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-vue-next'
+import ModalCancelarPedido from '../components/ModalCancelarPedido.vue'
 
 export default {
   name: 'ConsultaPedidos',
-  components: { History, ChevronRight, ChevronDown, ChevronUp, ArrowLeft },
+  components: { History, ChevronRight, ChevronDown, ChevronUp, ArrowLeft, ModalCancelarPedido },
   data() {
     return {
       loading: false,
       carregandoItens: false,
+      processando: false,
       lista: [],
       pedidoExpandido: null,
-      itensPedido: []
+      itensPedido: [],
+      modalCancelamento: {
+        mostrar: false,
+        pedidoId: null
+      }
     }
   },
   mounted() {
@@ -208,9 +264,7 @@ export default {
       this.loading = true
       try {
         const { data } = await axios.get('/pedido-consumivel', {
-          params: { 
-            per_page: 10000
-          }
+          params: { per_page: 10000 }
         })
         this.lista = Array.isArray(data.data) ? data.data : []
         this.lista.sort((a, b) => (b.id || b.pedido_consumivel_id || 0) - (a.id || a.pedido_consumivel_id || 0))
@@ -220,11 +274,22 @@ export default {
       } finally {
         this.loading = false
       }
+      // lista.status = toLowerCase(status)
+      console.log('status pedidos', this.lista)
     },
+
     formatarData(data) {
       if (!data) return '-'
       try {
         return new Date(data).toLocaleDateString('pt-BR')
+      } catch {
+        return String(data)
+      }
+    },
+    formatarDataHora(data) {
+      if (!data) return '-'
+      try {
+        return new Date(data).toLocaleString('pt-BR')
       } catch {
         return String(data)
       }
@@ -279,6 +344,64 @@ export default {
           uniqueId: Date.now() + Math.random()
         }
       })
+    },
+    async confirmarPedido(pedido) {
+      if (!confirm('Deseja confirmar este pedido?')) return
+
+      this.processando = true
+      try {
+        const pedidoId = pedido.id || pedido.pedido_consumivel_id
+        await axios.post(`/confirmar-pedido-consumivel/${pedidoId}`)
+        
+        alert('Pedido confirmado com sucesso!')
+        await this.carregarPedidos()
+        
+        // Reabrir o pedido se estava expandido
+        if (this.pedidoExpandido === pedidoId) {
+          const pedidoAtualizado = this.lista.find(p => (p.id || p.pedido_consumivel_id) === pedidoId)
+          if (pedidoAtualizado) {
+            await this.carregarItensPedido(pedidoAtualizado)
+          }
+        }
+      } catch (e) {
+        console.error('Erro ao confirmar pedido:', e)
+        alert(e.response?.data?.erro || 'Erro ao confirmar pedido')
+      } finally {
+        this.processando = false
+      }
+    },
+    abrirModalCancelarPedido(pedido) {
+      this.modalCancelamento = {
+        mostrar: true,
+        pedidoId: pedido.id || pedido.pedido_consumivel_id
+      }
+    },
+    async handleCancelarPedido({ pedidoId, observacao }) {
+      this.processando = true
+      this.modalCancelamento.mostrar = false
+      
+      try {
+        await axios.delete(`/deletar-pedido-consumivel/${pedidoId}, ${observacao}`
+        /* , {
+          data: { observacao_cancelamento: observacao }
+        } */
+        )
+        
+        alert('Pedido cancelado com sucesso!')
+        await this.carregarPedidos()
+        
+        if (this.pedidoExpandido === pedidoId) {
+          const pedidoAtualizado = this.lista.find(p => (p.id || p.pedido_consumivel_id) === pedidoId)
+          if (pedidoAtualizado) {
+            await this.carregarItensPedido(pedidoAtualizado)
+          }
+        }
+      } catch (e) {
+        console.error('Erro ao cancelar pedido:', e)
+        alert(e.response?.data?.erro || 'Erro ao cancelar pedido')
+      } finally {
+        this.processando = false
+      }
     }
   }
 }

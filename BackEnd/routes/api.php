@@ -69,18 +69,20 @@ Route::delete('/deletar-consumivel/{id}', [ProdutoConsumivelController::class, '
 // Pedidos consumível
 Route::post('/criar-pedido-com-itens-consumivel', [PedidoConsumivelController::class, 'criarPedidoCompleto']);
 Route::get('/pedido-consumivel', [PedidoConsumivelController::class, 'index']);
-
 // Adiciona rota para obter detalhes de um pedido específico (usada em CriarPedido.vue)
 Route::get('/pedido-consumivel/{id}', [PedidoConsumivelController::class, 'show']);
-
 Route::post('/criar-pedido-consumivel', [PedidoConsumivelController::class, 'store']);
 Route::put('/editar-pedido-consumivel/{id}', [PedidoConsumivelController::class, 'update']);
-Route::delete('/deletar-pedido-consumivel/{id}', [PedidoConsumivelController::class, 'delete']);
+Route::delete('/deletar-pedido-consumivel/{id}, {observacao_cancelamento}', [PedidoConsumivelController::class, 'delete']);
+Route::post('/confirmar-pedido-consumivel/{id}', [PedidoConsumivelController::class, 'confirmar']);
 
 // Produto do pedido consumível (itens)
 Route::post('/criar_produto_pedido_consumivel', [ProdutoPedidoConsumivelController::class, 'store']);
 Route::put('/editar_produto_pedido_consumivel/{id}', [ProdutoPedidoConsumivelController::class, 'update']);
 Route::delete('/produtos-pedido-consumivel/{id}', [ProdutoPedidoConsumivelController::class, 'destroy']);
+
+
+// ...existing code...
 
 //Relatórios
 Route::get('/relatorio/patrimonio', [RelatorioController::class, 'relatorioPatrimonio']);
