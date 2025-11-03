@@ -30,7 +30,7 @@
 
             <div class="border-x border-b border-gray-200 rounded-b-xl overflow-y-auto">
               <button
-                v-for="pedido in lista"
+                v-for="pedido in pedidosFiltrados"
                 :key="pedido.id || pedido.pedido_consumivel_id"
                 @click="selecionarPedido(pedido)"
                 class="w-full text-left p-4 grid grid-cols-6 gap-4 items-center hover:bg-gray-50 transition-colors border-b last:border-b-0"
@@ -51,13 +51,17 @@
                 </div>
                 <div class="text-sm">
                   <span class="px-2 py-1 rounded-full"
-                        :class="(pedido.status || 'Pendente') === 'Pendente' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'">
+                        :class="{
+                          'bg-yellow-100 text-yellow-700': pedido.status === 'Pendente',
+                          'bg-green-100 text-green-700': pedido.status === 'Concluído',
+                          'bg-blue-100 text-blue-700': !pedido.status || (pedido.status !== 'Pendente' && pedido.status !== 'Concluído' && pedido.status !== 'Cancelado')
+                        }">
                     {{ pedido.status || 'Pendente' }}
                   </span>
                 </div>
               </button>
 
-              <div v-if="lista.length === 0" class="text-center py-12">
+              <div v-if="pedidosFiltrados.length === 0" class="text-center py-12">
                 <History class="w-12 h-12 text-gray-300 mx-auto mb-4" />
                 <p class="text-gray-500">Nenhum pedido encontrado</p>
               </div>
@@ -90,6 +94,15 @@ export default {
     return {
       loading: false,
       lista: []
+    }
+  },
+  computed: {
+    pedidosFiltrados() {
+      // Filtra pedidos cancelados
+      return this.lista.filter(pedido => {
+        const status = (pedido.status || 'Pendente').toLowerCase()
+        return status !== 'cancelado'
+      })
     }
   },
   watch: {

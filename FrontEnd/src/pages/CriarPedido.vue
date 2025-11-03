@@ -105,6 +105,30 @@
             </div>
           </div>
 
+          <!-- Card de status -->
+          <div 
+            class="text-right p-4 rounded-xl flex-shrink-0"
+            :class="{
+              'bg-yellow-50': statusPedido === 'pendente',
+              'bg-green-50': statusPedido === 'concluído',
+              'bg-red-50': statusPedido === 'cancelado',
+              'bg-blue-50': !statusPedido || (statusPedido !== 'pendente' && statusPedido !== 'concluído' && statusPedido !== 'cancelado')
+            }"
+          >
+            <div 
+              class="text-sm font-medium mb-2"
+              :class="{
+                'text-yellow-700': statusPedido === 'pendente',
+                'text-green-700': statusPedido === 'concluído',
+                'text-red-700': statusPedido === 'cancelado',
+                'text-gray-600': !statusPedido || (statusPedido !== 'pendente' && statusPedido !== 'concluído' && statusPedido !== 'cancelado')
+              }"
+            >
+              Status do pedido: 
+              <span class="font-bold">{{ statusPedido || 'Novo' }}</span>
+            </div>
+          </div>
+
           <!-- Card de total de itens -->
           <div class="text-right bg-blue-50 p-4 rounded-xl flex-shrink-0">
             <div class="text-sm text-gray-600 mb-2">Total de itens: {{ itensPedido.length }}</div>
@@ -215,7 +239,6 @@
                   </button>
                 </div>
                 
-                <!-- retornar input jamba -->
                 <div v-if="temErroQuantidade(item) && pedidoSelecionadoId == null" class="text-xs text-red-600 font-medium">
                   Máximo disponível: {{ item.quantidade }}
                 </div>
@@ -375,20 +398,6 @@
                 </svg>
                 {{ salvando ? 'Salvando...' : (pedidoSelecionadoId !== null ? 'Atualizar Pedido' : 'Salvar Pedido') }}
               </button>
-              
-              <button
-                @click="logger()"
-                :disabled="salvando || (itensPedido.length === 0 && this.itensRemovidosIds.length <= 0) || temItensComErro" 
-                :class="[
-                  'text-white font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 hover:shadow-xl flex items-center gap-2',
-                  pedidoSelecionadoId !== null 
-                    ? 'bg-orange-600 hover:bg-orange-700' 
-                    : 'bg-blue-600 hover:bg-blue-700',
-                  (salvando || (itensPedido.length === 0 && this.itensRemovidosIds.length <= 0) || temItensComErro) ? 'opacity-50 cursor-not-allowed' : ''
-                ]"
-              >
-              Jambao
-              </button>
             
             </div>
           </div>
@@ -443,7 +452,8 @@ export default {
       searchTimeout: null,
       carregando: false,
       salvando: false,
-      observacoes: ''
+      observacoes: '',
+      statusPedido: ''
     }
   },
   computed: {
@@ -476,19 +486,9 @@ export default {
   },
 
   methods: {
-    logger(index, log) {
-      if (log = 1) 
-      {
-        console.log('pode aumentar quantidade? - ', this.podeAumentarQuantidade(index));
-      }
-      else if (log = 2)
-      {
-        console.log('tem items com erro?' + this.temItensComErro)
-      }
-    },
 
     temErroQuantidade(item) 
-    { //jamba
+    {
       if (!item || !item.qtdPedido || !item.quantidade) return false;
       const disponivel = Number.parseInt(item.quantidade, 10);
       let quantidade = Number.parseInt(item.qtdPedido, 10);
@@ -521,6 +521,7 @@ export default {
       }
       this.itensPedido = []
       this.observacoes = ''
+      this.statusPedido = ''
       this.pedidoSelecionadoId = null
       this.filtros = {
         searchProduto: '',
@@ -547,6 +548,42 @@ export default {
       }
     },
 
+    adicionarItem(produto) {
+      // Verifica se o produto já foi adicionado
+      if (this.itemJaSelecionado(produto.id)) {
+        alert('⚠️ Este produto já foi adicionado ao pedido!')
+        return
+      }
+
+      if (produto.quantidade === 0) {
+        alert('⚠️ Este produto está sem estoque disponível.')
+        return
+      }
+
+      const novoItem = {
+        ...produto,
+        uniqueId: Date.now() + Math.random(),
+        qtdPedido: 1,
+        qtdPedidoReservado: 0,
+        qtdPedidoDiferença: produto.quantidade
+      }
+
+      this.itensPedido.push(novoItem)
+      this.atualizarStatusProdutos()
+    },
+
+    adicionarItemDuplo(produto) {
+      // Verifica se o produto já foi adicionado
+      if (this.itemJaSelecionado(produto.id)) {
+        alert('⚠️ Este produto já foi adicionado ao pedido!')
+        return
+      }
+
+      if (produto.quantidade > 0) {
+        this.adicionarItem(produto)
+      }
+    },
+
     onDrop(event) {
       event.preventDefault()
       this.isDragging = false
@@ -556,36 +593,27 @@ export default {
         if (!data) return
 
         const produto = JSON.parse(data)
+
+        // Verifica se o produto já foi adicionado
+        if (this.itemJaSelecionado(produto.id)) {
+          alert('⚠️ Este produto já foi adicionado ao pedido!')
+          return
+        }
+
         this.adicionarItem(produto)
       } catch (err) {
         console.error('Erro ao processar drop:', err)
       }
     },
 
-    adicionarItem(produto) {
-      if (produto.quantidade === 0 || this.itemJaSelecionado(produto.id)) {
-        return
-      }
-
-      const novoItem = {
-        ...produto,
-        uniqueId: Date.now() + Math.random(),
-        qtdPedido: 1
-      }
-
-      this.itensPedido.push(novoItem)
-      this.atualizarStatusProdutos()
-    },
-
-    adicionarItemDuplo(produto) {
-      if (produto.quantidade > 0 && !this.itemJaSelecionado(produto.id)) {
-        this.adicionarItem(produto)
-      }
-    },
-
     itemJaSelecionado(produtoId) {
+      console.log('item ja selecionado - ' + this.itensPedido.some(item =>
+        parseInt(item.id) === parseInt(produtoId) ||
+        parseInt(item.produtos_consumivel_id) === parseInt(produtoId)
+      ))
       return this.itensPedido.some(item =>
-        parseInt(item.id) === parseInt(produtoId)
+        parseInt(item.id) === parseInt(produtoId) ||
+        parseInt(item.produtos_consumivel_id) === parseInt(produtoId)
       )
     },
 
@@ -603,10 +631,20 @@ export default {
       this.atualizarStatusProdutos()
     },
 
+    logger (index) {
+      const item = this.itensPedido[index]
+      console.log('logger -  item: ' + JSON.stringify(item));
+    },
+    
+
     podeAumentarQuantidade(index) {
       const item = this.itensPedido[index]
       let qtdPedidoDiferenca = isNaN(item.qtdPedidoDiferença) ? 0 : item.qtdPedidoDiferença
-      console.log('podeAumentarQuantidade chamado para item index ' + index + ' com qtdPedidoDiferenca ' + qtdPedidoDiferenca + ' e id ' + this.pedidoSelecionadoId);
+      console.log('true? - ' + (
+        (item.qtdPedido < item.quantidade && this.pedidoSelecionadoId == null) ||
+        (this.pedidoSelecionadoId !== null &&
+          (item.qtdPedidoDiferença < item.quantidade || qtdPedidoDiferenca <= 0))
+      ));
       return (
         (item.qtdPedido < item.quantidade && this.pedidoSelecionadoId == null) ||
         (this.pedidoSelecionadoId !== null &&
@@ -771,7 +809,7 @@ export default {
       }
 
       if (this.itensPedido.length === 0 && this.itensRemovidosIds.length > 0) {
-        if (!confirm('⚠️ Todos os itens serão removidos. Deseja EXCLUIR o pedido permanentemente?')) {
+        if (!confirm('⚠️ O pedido será cancelado. Deseja CANCELAR o pedido?')) {
           return
         }
       } else {
@@ -803,11 +841,11 @@ export default {
             mostrar: true,
             tipo: 'sucesso',
             titulo: 'Pedido Excluído com Sucesso! 🗑️',
-            mensagem: 'Todos os itens foram removidos e o pedido foi excluído permanentemente.',
+            mensagem: 'O pedido foi cancelado conforme requisitado.',
             detalhes: {
               pedidoId: this.pedidoSelecionadoId,
               totalItensRemovidos: this.itensRemovidosIds.length,
-              status: 'Excluído'
+              status: 'Cancelado'
             }
           }
         } else {
@@ -961,9 +999,10 @@ export default {
         const itens = Array.isArray(pedidoDetalhe.itens) ? pedidoDetalhe.itens : []
         this.itensPedido = this.mapItensPedidoParaitensPedido(itens)
       
-        this.observacoes = pedidoDetalhe.observacoes || ''
+        this.observacoes  = pedidoDetalhe.observacoes || ''
+        this.statusPedido = pedidoDetalhe.status || ''
         this.pedidoSelecionadoId = pedidoDetalhe.id || pedidoDetalhe.pedido_consumivel_id || null
-        this.itensRemovidosIds = [] // Reseta array de itens removidos ao carregar novo pedido
+        this.itensRemovidosIds   = [] // Reseta array de itens removidos ao carregar novo pedido
 
         this.$nextTick(() => this.atualizarStatusProdutos())
       } catch (e) {
@@ -976,9 +1015,9 @@ export default {
 
     mapItensPedidoParaitensPedido(itens) {
       return itens.map((i) => {
-        const produto = i.produto || i.consumivel || i.item || {}
-        const produtoId = parseInt(i.produtos_consumivel_id ?? produto.id ?? i.id)
-        const qtdSolicitada = parseInt(i.quantidade_solicitada ?? i.quantidade ?? i.qtd ?? 1)
+        const produto           = i.produto || i.consumivel || i.item || {}
+        const produtoId         = parseInt(i.produtos_consumivel_id ?? produto.id ?? i.id)
+        const qtdSolicitada     = parseInt(i.quantidade_solicitada ?? i.quantidade ?? i.qtd ?? 1)
         const estoqueDisponivel = parseInt(
           produto.quantidade ?? produto.estoque ?? i.quantidade_disponivel ?? i.disponivel ?? qtdSolicitada
         )
@@ -1005,6 +1044,7 @@ export default {
         if (confirm('Deseja realmente limpar todos os dados do formulário?')) {
           this.pedidoSelecionadoId = null
           this.observacoes = ''
+          this.statusPedido = ''
           this.itensPedido = []
           this.itensRemovidosIds = [] // Limpa array de itens removidos
           this.atualizarStatusProdutos()

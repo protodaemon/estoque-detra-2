@@ -102,10 +102,18 @@ class PedidoConsumivelController extends Controller
                     throw new \Exception("Produto ID {$produtoId} não encontrado");
                 }
 
+                Log::info('Estoque verificado', [
+                    'produto_id' => $produtoId,
+                    'estoque_disponivel' => $produto->quantidade,
+                    'quantidade_solicitada' => $quantidade
+                ]);
+
+
                 // ✅ VERIFICAR ESTOQUE
                 if ($produto->quantidade < $quantidade) {
                     throw new \Exception("Estoque insuficiente para '{$produto->nome}'. Disponível: {$produto->quantidade}, Solicitado: {$quantidade}");
                 }
+
 
                 // Criar item do pedido
                 $itemPedido = ProdutoPedidoConsumivel::create([
@@ -260,7 +268,8 @@ class PedidoConsumivelController extends Controller
 
             // Se ficou sem itens, usa a função delete do controller
             if ($resultado['tipo'] === 'excluir') {
-                return $this->delete($id);
+                $obs = $validated['observacao'] ?? 'Cancelado ao remover todos os itens na edição';
+                return $this->delete($id, $obs);
             }
 
             return response()->json([
@@ -278,23 +287,30 @@ class PedidoConsumivelController extends Controller
         }
     }
 
-    public function delete($id)
+    public function delete($id, $observacao_cancelamento = null)
     {
         try {
-            DB::transaction(function () use ($id) {
+            DB::transaction(function () use ($id, $observacao_cancelamento) {
                 $pedido = PedidoConsumivel::lockForUpdate()->findOrFail($id);
 
-                // Devolve estoque e remove itens
-                $itens = ProdutoPedidoConsumivel::where('pedido_consumivel_id', $id)->lockForUpdate()->get();
+                // Devolve estoque e (opcionalmente) remove itens
+                $itens = ProdutoPedidoConsumivel::where('pedido_consumivel_id', $id)
+                    ->lockForUpdate()->get();
+
                 foreach ($itens as $item) {
                     $produto = ProdutoConsumivel::lockForUpdate()->findOrFail($item->produtos_consumivel_id);
                     $produto->quantidade += (int) $item->quantidade;
                     $produto->save();
-                    $item->delete();
+
+                    // Se preferir manter histórico dos itens no pedido cancelado, deixe comentado:
+                    // $item->delete();
                 }
 
-                // Exclui o pedido
-                $pedido->delete();
+                // Marca como cancelado
+                $pedido->data_cancelamento = now();
+                $pedido->status = 'cancelado';
+                $pedido->observacao_cancelamento = $observacao_cancelamento;
+                $pedido->save();
             });
 
             return response()->json([
@@ -387,6 +403,58 @@ class PedidoConsumivelController extends Controller
                 'mensagem' => 'Erro ao finalizar pedido',
                 'erro' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function show(int $id)
+    {
+        try {
+            $pedido = PedidoConsumivel::with(['itens.produto'])->findOrFail($id);
+            return response()->json(['data' => $pedido], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::warning('Pedido não encontrado', ['id' => $id]);
+            return response()->json(['erro' => 'Pedido não encontrado.'], 404);
+        } catch (\Throwable $e) {
+            Log::error('Erro ao recuperar pedido: ' . $e->getMessage(), [
+                'stack' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['erro' => 'Falha ao recuperar pedido.'], 500);
+        }
+    }
+
+    public function confirmar(int $id)
+    {
+        try {
+            $pedido = PedidoConsumivel::findOrFail($id);
+            
+            if ($pedido->status === 'concluido') {
+                return response()->json([
+                    'erro' => 'Pedido já está concluído.'
+                ], 400);
+            }
+
+            if ($pedido->status === 'cancelado') {
+                return response()->json([
+                    'erro' => 'Não é possível confirmar um pedido cancelado.'
+                ], 400);
+            }
+
+            $pedido->status = 'concluido';
+            $pedido->data_confirmacao = now();
+            $pedido->save();
+
+            return response()->json([
+                'mensagem' => 'Pedido confirmado com sucesso!',
+                'pedido' => $pedido->fresh()
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['erro' => 'Pedido não encontrado.'], 404);
+        } catch (\Throwable $e) {
+            Log::error('Erro ao confirmar pedido: ' . $e->getMessage(), [
+                'stack' => $e->getTraceAsString()
+            ]);
+            return response()->json(['erro' => 'Falha ao confirmar pedido.'], 500);
         }
     }
 }
