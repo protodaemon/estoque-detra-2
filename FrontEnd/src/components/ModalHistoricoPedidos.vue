@@ -52,11 +52,11 @@
                 <div class="text-sm">
                   <span class="px-2 py-1 rounded-full"
                         :class="{
-                          'bg-yellow-100 text-yellow-700': pedido.status === 'Pendente',
-                          'bg-green-100 text-green-700': pedido.status === 'Concluído',
-                          'bg-blue-100 text-blue-700': !pedido.status || (pedido.status !== 'Pendente' && pedido.status !== 'Concluído' && pedido.status !== 'Cancelado')
+                          'bg-yellow-100 text-yellow-700': pedido.status === 'pendente',
+                          'bg-green-100 text-green-700': pedido.status === 'concluido',
+                          'bg-blue-100 text-blue-700': !pedido.status || (pedido.status !== 'pendente' && pedido.status !== 'concluido' && pedido.status !== 'cancelado')
                         }">
-                    {{ pedido.status || 'Pendente' }}
+                    {{ pedido.status || 'pendente' }}
                   </span>
                 </div>
               </button>
@@ -100,8 +100,8 @@ export default {
     pedidosFiltrados() {
       // Filtra pedidos cancelados
       return this.lista.filter(pedido => {
-        const status = (pedido.status || 'Pendente').toLowerCase()
-        return status !== 'cancelado'
+        const status = (pedido.status || 'pendente').toLowerCase()
+        return (status === 'pendente')
       })
     }
   },

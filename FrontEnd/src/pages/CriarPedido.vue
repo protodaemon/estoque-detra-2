@@ -194,8 +194,9 @@
                 <div
                   class="absolute top-2 left-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
                   Disponível: {{ item.quantidade }}
+                  ID: {{ item.produtos_consumivel_id }}
+                  ID2: {{ item.id }}
                 </div>
-
                 <div v-if="temErroQuantidade(item) && pedidoSelecionadoId == null"
                   class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
                   ⚠️
@@ -288,10 +289,12 @@
                   peca.quantidade === 0
                     ? 'opacity-40 cursor-not-allowed grayscale'
                     : itemJaSelecionado(peca.id)
-                      ? 'border-2 border-blue-500 bg-blue-50 opacity-60'
+                      ? 'border-2 border-blue-500 bg-blue-50 opacity-40'
                       : 'cursor-move hover:shadow-xl hover:border-blue-300 hover:-translate-y-2 transform'
                 ]"
-                :draggable="peca.quantidade > 0 && !itemJaSelecionado(peca.id)"
+                :dragstart="peca.quantidade > 0 && !itemJaSelecionado(peca.produtos_consumivel_id)"
+                :draggable="peca.quantidade > 0 && !itemJaSelecionado(peca.produtos_consumivel_id)"
+                :dblclick= "0 === 1"
                 @dragstart="startDrag($event, peca)"
                 @dblclick="adicionarItemDuplo(peca)"
               >
@@ -574,10 +577,15 @@ export default {
 
     adicionarItemDuplo(produto) {
       // Verifica se o produto já foi adicionado
-      if (this.itemJaSelecionado(produto.id)) {
+      /* if (this.itemJaSelecionado(produto.id)) {
+        alert('⚠️ Este produto já foi adicionado ao pedido!')
+        return
+      } */
+      if (this.itemJaSelecionado(produto.produtos_consumivel_id)) {
         alert('⚠️ Este produto já foi adicionado ao pedido!')
         return
       }
+
 
       if (produto.quantidade > 0) {
         this.adicionarItem(produto)
@@ -607,10 +615,6 @@ export default {
     },
 
     itemJaSelecionado(produtoId) {
-      console.log('item ja selecionado - ' + this.itensPedido.some(item =>
-        parseInt(item.id) === parseInt(produtoId) ||
-        parseInt(item.produtos_consumivel_id) === parseInt(produtoId)
-      ))
       return this.itensPedido.some(item =>
         parseInt(item.id) === parseInt(produtoId) ||
         parseInt(item.produtos_consumivel_id) === parseInt(produtoId)
@@ -640,15 +644,15 @@ export default {
     podeAumentarQuantidade(index) {
       const item = this.itensPedido[index]
       let qtdPedidoDiferenca = isNaN(item.qtdPedidoDiferença) ? 0 : item.qtdPedidoDiferença
-      console.log('true? - ' + (
+      /* console.log('pode aumentar qtd true? - ' + (
         (item.qtdPedido < item.quantidade && this.pedidoSelecionadoId == null) ||
         (this.pedidoSelecionadoId !== null &&
           (item.qtdPedidoDiferença < item.quantidade || qtdPedidoDiferenca <= 0))
-      ));
+      )); */
       return (
         (item.qtdPedido < item.quantidade && this.pedidoSelecionadoId == null) ||
         (this.pedidoSelecionadoId !== null &&
-          (item.qtdPedidoDiferença < item.quantidade || qtdPedidoDiferenca <= 0))
+          (item.qtdPedidoDiferença < item.quantidade || (qtdPedidoDiferenca < 0 && item.quantidade <= 0)))
       )
     },
 
@@ -1021,7 +1025,7 @@ export default {
         const estoqueDisponivel = parseInt(
           produto.quantidade ?? produto.estoque ?? i.quantidade_disponivel ?? i.disponivel ?? qtdSolicitada
         )
-
+      console.log('mapItensPedidoParaitensPedido - produtoId:', produtoId)
         return {
           id: produtoId,
           produtos_consumivel_id: produtoId,
