@@ -96,11 +96,6 @@ Route::post('/entrada-consumivel', [EntradaConsumivelController::class, 'store']
 //Saída Consumível
 Route::get('/saida-consumivel', [SaidaConsumivelController::class, 'index']);
 Route::post('/saida-consumivel', [SaidaConsumivelController::class, 'store']);
-});
-// Criação do pedido consumível
-
-
-// Route::post('/criar-pedido', )
 
 //outros
 //Route::get('/estatisticas', [MenuController::class, 'getEstatisticas']);
