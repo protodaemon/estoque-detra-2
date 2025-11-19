@@ -20,7 +20,7 @@ export default {
     };
   },
   created() {
-    this.checaSessao();
+    //this.checaSessao();
     // LÁ EM BAIXO NO COMPOENTNE
   },
   methods: {

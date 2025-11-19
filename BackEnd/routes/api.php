@@ -29,7 +29,7 @@ Route::get('/check-session', function () {
     return response()->json(['logado' => false, 'session' => $_SESSION]);
 });
 
-Route::middleware(['check.nome.servidor'])->group(function () {
+//Route::middleware(['check.nome.servidor'])->group(function () {  //prod
 Route::post('/login', [UsuarioController::class, 'login']);
 Route::post('/registro', [UsuarioController::class, 'register']);
 Route::middleware('auth.token')->post('/logout', [UsuarioController::class, 'logout']);
@@ -96,7 +96,7 @@ Route::post('/entrada-consumivel', [EntradaConsumivelController::class, 'store']
 //Saída Consumível
 Route::get('/saida-consumivel', [SaidaConsumivelController::class, 'index']);
 Route::post('/saida-consumivel', [SaidaConsumivelController::class, 'store']);
-
+//});
 //outros
 //Route::get('/estatisticas', [MenuController::class, 'getEstatisticas']);
 //Route::get('/categorias', [LocacaoController::class, 'listarCategorias']);

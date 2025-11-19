@@ -11,5 +11,5 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'), // adiciona o alias @ para src
     },
   },
-  base: '/estoque_patrimonio/patrimonio/dist/',  // Isso gera caminhos relativos em vez de absolutos
+  //base: '/estoque_patrimonio/patrimonio/dist/',  // Isso gera caminhos relativos em vez de absolutos //prod
 })
