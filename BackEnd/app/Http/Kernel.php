@@ -49,6 +49,8 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         // ...
         'check.nome.servidor' => \App\Http\Middleware\CheckNomeServidor::class,
+        'jwt.auth' => \PHPOpenSourceSaver\JWTAuth\Http\Middleware\Authenticate::class,
+        'jwt.refresh' => \PHPOpenSourceSaver\JWTAuth\Http\Middleware\RefreshToken::class,
     ];
 
     /**

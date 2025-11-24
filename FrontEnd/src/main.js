@@ -1,31 +1,43 @@
-import { createApp } from 'vue'
-import './style.css'
-import './scrollbar.css'
-import App from './App.vue'
-import axios from 'axios'
-import router from './router'
+import { createApp } from 'vue';
+import './style.css';
+import './scrollbar.css';
+import App from './App.vue';
+import axios from 'axios';
+import router from './router';
+import * as lucide from 'lucide-vue-next';
 
-// ⬇️ Importa todos os ícones do Lucide
-import * as lucide from 'lucide-vue-next'
+const app = createApp(App);
 
-const app = createApp(App)
-
-// ⬇️ Registra todos os ícones globalmente
+// Registrar ícones
 for (const [key, component] of Object.entries(lucide)) {
-  app.component(key, component)
+  app.component(key, component);
 }
 
-// ⬇️ Configura o Axios
-axios.defaults.baseURL = 'http://localhost:8000/api' //pra dev
-//axios.defaults.baseURL = 'https://amttdetra.com/estoque_patrimonio/backend/public/api' //pra prod
-axios.defaults.withCredentials = false
+// 🌐 Base URL global
+axios.defaults.baseURL = 'http://localhost:8000/api';
+// axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
-const token = localStorage.getItem('token')
+// Inclui token se existir
+const token = localStorage.getItem('token');
 if (token) {
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }
 
-app.config.globalProperties.$axios = axios
+// 🔐 Interceptor: trata erros de autenticação
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      router.push('/login');
+    }
+    return Promise.reject(error);
+  }
+);
 
-app.use(router)
-app.mount('#app')
+// Disponibiliza axios global em todos os componentes via this.$axios
+app.config.globalProperties.$axios = axios;
+
+app.use(router);
+app.mount('#app');

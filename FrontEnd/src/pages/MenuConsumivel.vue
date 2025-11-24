@@ -208,14 +208,14 @@ export default {
       // Verificar se a opção requer senha
       const opcao = this.opcoes.find(o => o.rota === rota);
       
-      if (opcao && opcao.requerSenha) {
+      /*if (opcao && opcao.requerSenha) {
         this.rotaPendente = rota;
         this.showPasswordModal = true;
         this.$nextTick(() => {
           this.$refs.inputSenha?.focus();
         });
         return;
-      }
+      } */
 
       // Para rotas sem senha, navegar normalmente
       this.showNotification = true

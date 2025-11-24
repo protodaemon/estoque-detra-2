@@ -18,21 +18,19 @@ use App\Http\Controllers\MenuController;
 use App\Models\ProdutoDecoracao;
 use App\Http\Controllers\LocacaoController;
 use App\Http\Controllers\LocalizacaoController;
+use App\Http\Controllers\AuthController;
 
-Route::get('/check-session', function () {
-    if (!isset($_SESSION)) {
-        session_start();
-    }
-    if (isset($_SESSION['nomeServidor'])) {
-        return response()->json(['logado' => true, 'session' => $_SESSION]);
-    }
-    return response()->json(['logado' => false, 'session' => $_SESSION]);
-});
+
+
+//Route::post('/login', [AuthController::class, 'login']);
+//Route::post('/register', [AuthController::class, 'register']);
+Route::post('/registro', [UsuarioController::class, 'register']);
+Route::post('/login', [UsuarioController::class, 'login']);
 
 //Route::middleware(['check.nome.servidor'])->group(function () {  //prod
-Route::post('/login', [UsuarioController::class, 'login']);
-Route::post('/registro', [UsuarioController::class, 'register']);
-Route::middleware('auth.token')->post('/logout', [UsuarioController::class, 'logout']);
+Route::middleware(['jwt.auth'])->group(function () {
+Route::post('/logout', [UsuarioController::class, 'logout']);
+Route::get('/me', [UsuarioController::class, 'me']); 
 
 //Categorias Patrimonio
 Route::get('/categorias-patrimonio', [CategoriaPatrimonioController::class, 'index']);
@@ -96,10 +94,9 @@ Route::post('/entrada-consumivel', [EntradaConsumivelController::class, 'store']
 //Saída Consumível
 Route::get('/saida-consumivel', [SaidaConsumivelController::class, 'index']);
 Route::post('/saida-consumivel', [SaidaConsumivelController::class, 'store']);
+});
 //});
-//outros
-//Route::get('/estatisticas', [MenuController::class, 'getEstatisticas']);
-//Route::get('/categorias', [LocacaoController::class, 'listarCategorias']);
+
 
 //stub
 // Route::post('/criar-lista', [LocacaoController::class, 'store']);

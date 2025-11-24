@@ -213,14 +213,14 @@ export default {
 
     navegar(rota) {
       // Se for a rota de patrimônio, mostrar modal de senha
-      if (rota === '/estoque-patrimonio') {
+      /*if (rota === '/estoque-patrimonio') {
         this.rotaPendente = rota;
         this.showPasswordModal = true;
         this.$nextTick(() => {
           this.$refs.inputSenha?.focus();
         });
         return;
-      }
+      } */
 
       // Para outras rotas, navegar normalmente
       this.showNotification = true
