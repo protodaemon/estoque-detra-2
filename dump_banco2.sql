@@ -7,6 +7,21 @@ DROP TABLE IF EXISTS saida_consumivel;
 DROP TABLE IF EXISTS entrada_consumivel;
 DROP TABLE IF EXISTS produtos_consumivel;
 DROP TABLE IF EXISTS categoria_consumivel;
+DROP TABLE IF EXISTS usuario;
+
+-- =========================
+-- TABELA USUARIO
+-- =========================
+CREATE TABLE
+  `usuario` (
+    `usuario_id` int unsigned NOT NULL AUTO_INCREMENT,
+    `user` varchar(255) DEFAULT NULL,
+    `senha` varchar(255) DEFAULT NULL,
+    `nome` varchar(255) DEFAULT NULL,
+    `email_rec` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`usuario_id`)
+  ) ENGINE = InnoDB AUTO_INCREMENT = 2 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
 -- =========================
 -- TABELA CATEGORIA_CONSUMIVEL
 -- =========================
