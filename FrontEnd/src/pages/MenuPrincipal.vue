@@ -1,16 +1,32 @@
 <template>
   <!-- Header/Breadcrumb -->
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-pink-50 to-purple-50">
-  <div class="w-full bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
-    <div class="max-w-7xl mx-auto px-6 py-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-800">Sistema de Estoque</h1>
-          <p class="text-sm text-gray-600 mt-1">Menu</p>
+ <div class="min-h-screen bg-gradient-to-br from-gray-50 via-pink-50 to-purple-50">
+    <div class="w-full bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
+      <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+          
+          <!-- ESQUERDA: Botão Voltar + Títulos -->
+          <div class="flex items-center gap-4">
+            <!-- Botão de Voltar -->
+            <a
+              href="https://amttdetra.com"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white/60 
+                     text-gray-700 text-sm font-medium hover:bg-gray-100 hover:border-gray-300 
+                     active:scale-[.97] transition-all group focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Voltar ao site principal"
+            >
+              <ArrowLeft class="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition-colors" />
+            </a>
+
+            <div>
+              <h1 class="text-2xl font-bold text-gray-800">Sistema de Estoque</h1>
+              <p class="text-sm text-gray-600 mt-1">Menu</p>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
-  </div>
 
   <!-- Main Content -->
   <div class="flex items-center justify-center min-h-[calc(90vh-80px)] p-6">
@@ -134,7 +150,7 @@
 </template>
 
 <script>
-import { PackageOpen, Package, Palette, ClipboardList, UserPlus, Plus, Truck } from 'lucide-vue-next'
+import { PackageOpen, Package, Palette, ClipboardList, UserPlus, Plus, Truck, ArrowLeft } from 'lucide-vue-next'
 
 export default {
   name: 'MenuPrincipal',
@@ -145,7 +161,8 @@ export default {
     ClipboardList,
     UserPlus,
     Plus,
-    Truck
+    Truck,
+    ArrowLeft 
   },
   data() {
     return {
