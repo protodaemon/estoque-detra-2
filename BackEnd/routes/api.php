@@ -24,11 +24,11 @@ use App\Http\Controllers\AuthController;
 
 //Route::post('/login', [AuthController::class, 'login']);
 //Route::post('/register', [AuthController::class, 'register']);
-Route::post('/registro', [UsuarioController::class, 'register']);
 Route::post('/login', [UsuarioController::class, 'login']);
 
 //Route::middleware(['check.nome.servidor'])->group(function () {  //prod
 Route::middleware(['jwt.auth'])->group(function () {
+Route::post('/registro', [UsuarioController::class, 'register']);
 Route::post('/logout', [UsuarioController::class, 'logout']);
 Route::get('/me', [UsuarioController::class, 'me']); 
 
