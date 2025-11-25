@@ -34,6 +34,10 @@ const routes = [
     path:'/cadastrar',
     name:'RegistroPage',
     component: RegistroPage,
+    meta: { 
+      requiresAuth: true,
+      role: 'admin' // Apenas admin
+    }
   },
   { 
     path: '/menu',

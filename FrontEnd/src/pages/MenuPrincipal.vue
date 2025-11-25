@@ -38,7 +38,8 @@
       </div>
 
       <!-- Cards Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6"> <!-- lg:grid-cols-3-->
+      <!-- Removemos as classes de colunas fixas e adicionamos :class="gridClasse" -->
+      <div :class="['grid gap-6', gridClasse]">
         <div 
           v-for="(opcao, index) in opcoes" 
           :key="opcao.titulo" 
@@ -164,6 +165,19 @@ export default {
     Truck,
     ArrowLeft 
   },
+  // Dentro do export default { ... }
+  computed: {
+    gridClasse() {
+      // Se tiver 3 ou mais opções (Admin), permite 3 colunas
+      if (this.opcoes.length >= 3) {
+        return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3';
+      }
+      
+      // Se for usuário comum (2 opções), limita a 2 colunas e centraliza o bloco
+      // 'max-w-4xl mx-auto' força o container a diminuir e centralizar na tela
+      return 'grid-cols-1 sm:grid-cols-2 max-w-4xl mx-auto'; 
+    }
+  },
   data() {
     return {
       showNotification: false,
@@ -202,9 +216,30 @@ export default {
     }
   },
   mounted(){
-    this.carregarEstatisticas();
+    //this.carregarEstatisticas();
+    this.checkAdminRole(); 
   },
   methods: {
+
+
+    checkAdminRole() {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        // Verifica se o nível de acesso é admin
+        if (user.nivel_acesso === 'admin') {
+          // Adiciona o botão dinamicamente ao array de opções
+          this.opcoes.push({
+            titulo: 'Cadastrar Usuário',
+            rota: '/cadastrar', // Rota definida no seu router
+            icone: 'UserPlus',
+            descricao: 'Adicione e configure novos usuários no sistema',
+            cor: 'green',
+            badge: null
+          });
+        }
+      }
+    },
 
     async carregarEstatisticas(){
       try{
