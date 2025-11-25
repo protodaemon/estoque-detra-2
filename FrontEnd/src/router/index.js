@@ -15,6 +15,7 @@ import MenuPedidosConsumivel from '../pages/MenuPedidosConsumivel.vue';
 import ConsultaPedidos from '../pages/ConsultaPedidos.vue';
 import LoginPage from '@/pages/LoginPage.vue';
 import RegistroPage from '@/pages/RegistroPage.vue';
+import AcessoNegado from '@/pages/AcessoNegado.vue';
 import axios from 'axios'
 
 
@@ -22,14 +23,17 @@ import axios from 'axios'
 const routes = [
   { 
     path: '/',
-    name: 'login', 
-    component: LoginPage
+    redirect: 'login'
+  },
+  {
+    path:'/login',
+    name:'login',
+    component: LoginPage,
   },
    {
     path:'/cadastrar',
     name:'RegistroPage',
     component: RegistroPage,
-    meta: {requiresAuth: false}
   },
   { 
     path: '/menu',
@@ -41,19 +45,28 @@ const routes = [
     path: '/patrimonio',
     name: 'menu-patrimonio',
     component: MenuPatrimonio,
-    meta: {requiresAuth: true}
+    meta: { 
+      requiresAuth: true,
+      role: 'admin' // Apenas admin
+    }
   },
   {
     path:'/estoque-patrimonio',
     name:'EstoquePatrimonio',
     component: EstoquePatrimonio,
-    meta: {requiresAuth: true}
+    meta: { 
+      requiresAuth: true,
+      role: 'admin' // Apenas admin
+    }
   },
   {
     path: '/entrada-patrimonio',
     name: 'EntradaPatrimonio',
     component: EntradaPatrimonio,
-    meta: {requiresAuth: true}
+    meta: { 
+      requiresAuth: true,
+      role: 'admin' // Apenas admin
+    }
   },
   {
     path: '/consumivel',
@@ -65,13 +78,19 @@ const routes = [
     path: '/estoque-consumivel',
     name: 'estoque-consumivel',
     component: EstoqueConsumivel,
-    meta: {requiresAuth: true}
+    meta: { 
+      requiresAuth: true,
+      role: 'admin' // Apenas admin
+    }
   },
   {
     path: '/entrada-consumivel',
     name: 'entrada-consumivel',
     component: EntradaConsumivel,
-    meta: {requiresAuth: true}
+    meta: { 
+      requiresAuth: true,
+      role: 'admin' // Apenas admin
+    }
   },
   {
     path: '/pedidos-consumivel',
@@ -89,13 +108,19 @@ const routes = [
     path: '/menu-entradas-consumivel',
     name: 'menu-entradas-consumivel',
     component: MenuEntradasConsumivel,
-    meta: {requiresAuth: true}
+    meta: { 
+      requiresAuth: true,
+      role: 'admin' // Apenas admin
+    }
   },
   {
     path: '/menu-saida-consumivel',
     name: 'menu-saida-consumivel',
     component: MenuSaidaConsumivel,
-    meta: {requiresAuth: true}
+    meta: { 
+      requiresAuth: true,
+      role: 'admin' // Apenas admin
+    }
   },
   {
     path: '/menu-pedidos',
@@ -107,7 +132,16 @@ const routes = [
     path: '/consultar-pedido',
     name: 'consultar-pedido',
     component: ConsultaPedidos,
-    meta: {requiresAuth: true}
+    meta: { 
+      requiresAuth: true,
+      role: 'admin' // Apenas admin
+    }
+  },
+  {
+    path: '/acesso-negado',
+    name: 'acesso-negado',
+    component: AcessoNegado,
+    meta: { requiresAuth: true }
   },
 ];
 
@@ -116,14 +150,30 @@ const router = createRouter({
   routes,
 });
 
+function getUser() {
+  const userStr = localStorage.getItem('user');
+  return userStr ? JSON.parse(userStr) : null;
+}
+
+
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  const currentUser = userStr ? JSON.parse(userStr) : null;
 
   // Se a rota exige autenticação
   if (to.meta.requiresAuth) {
     // Se não há token → manda pro login
     if (!token) {
       return next({ name: 'login' });
+    }
+
+    if (to.meta.role === 'admin') {
+      // Se o usuário não tiver nivel_acesso ou não for admin
+      if (!currentUser || currentUser.nivel_acesso !== 'admin') {
+        // Redireciona para uma página padrão (ex: acesso negado) ou exibe erro
+        return next({ name: 'acesso-negado' });
+      }
     }
 
     try {

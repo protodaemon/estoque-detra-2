@@ -19,8 +19,9 @@ CREATE TABLE
     `senha` varchar(255) DEFAULT NULL,
     `nome` varchar(255) DEFAULT NULL,
     `email_rec` varchar(255) DEFAULT NULL,
+    `nivel_acesso` varchar(20) NOT NULL DEFAULT 'padrao',
     PRIMARY KEY (`usuario_id`)
-  ) ENGINE = InnoDB AUTO_INCREMENT = 2 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+  ) ENGINE = InnoDB AUTO_INCREMENT = 2 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
 
 -- =========================
 -- TABELA CATEGORIA_CONSUMIVEL

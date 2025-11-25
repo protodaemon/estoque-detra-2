@@ -31,10 +31,11 @@ const AuthService = {
       // ⚠️ Verifique o nome do campo retornado pelo backend
       // (pode ser "access_token" ou "token")
       const token = response.data.access_token || response.data.token;
+      const usuario = response.data.usuario; 
 
       if (token) {
         localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(response.data.user || {}));
+        localStorage.setItem('user', JSON.stringify(usuario));
 
         // Define imediatamente o header padrão do Axios
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;

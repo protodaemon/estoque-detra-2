@@ -19,6 +19,7 @@ class Usuario extends Authenticatable implements JWTSubject
         'senha',
         'nome',
         'email_rec',
+        'nivel_acesso' //dois niveis: padrao e admin
     ];
 
     protected $hidden = [
