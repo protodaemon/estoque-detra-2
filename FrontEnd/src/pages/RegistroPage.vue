@@ -14,7 +14,7 @@
               <div class="flex items-center text-sm text-gray-600 mt-1 space-x-2">
                 <span class="text-gray-400">Menu</span>
                 <ChevronRight class="w-4 h-4" />
-                <span class="text-pink-600 font-medium">Registro</span>
+                <span class="text-blue-600 font-medium">Registro</span>
               </div>
             </div>
           </div>
@@ -22,12 +22,12 @@
       </div>
     </div>
   <div
-    class="flex items-center justify-center min-h-[90vh] bg-gradient-to-br from-pink-100 via-pink-50 to-white p-4"
+    class="flex items-center justify-center min-h-[90vh] bg-gradient-to-br from-blue-100 via-blue-50 to-white p-4"
   >
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
       
       <!-- Header -->
-      <div class="bg-gradient-to-r from-pink-400 to-pink-600 p-8 text-white text-center relative">
+      <div class="bg-gradient-to-r from-blue-400 to-blue-600 p-8 text-white text-center relative">
         <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
         <div class="absolute bottom-0 left-0 w-20 h-20 bg-white/10 rounded-full translate-y-10 -translate-x-10"></div>
         
@@ -92,7 +92,7 @@
           <!-- Campo Nome -->
           <div class="space-y-2">
             <label for="nome" class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <svg class="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
               </svg>
               Nome Completo
@@ -102,7 +102,7 @@
               v-model="form.nome"
               type="text"
               placeholder="Digite seu nome completo"
-              class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-200 bg-gray-50 hover:bg-white"
+              class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-gray-50 hover:bg-white"
               required
             />
           </div>
@@ -110,7 +110,7 @@
           <!-- Campo Usuário -->
           <div class="space-y-2">
             <label for="user" class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <svg class="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               Usuário
@@ -120,7 +120,7 @@
               v-model="form.user"
               type="text"
               placeholder="Digite seu usuário"
-              class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-200 bg-gray-50 hover:bg-white"
+              class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-gray-50 hover:bg-white"
               required
             />
           </div>
@@ -128,7 +128,7 @@
           <!-- Campo Email -->
           <div class="space-y-2">
             <label for="email_rec" class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <svg class="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
               </svg>
               Email de Recuperação
@@ -138,7 +138,7 @@
               v-model="form.email_rec"
               type="email"
               placeholder="Digite seu email de recuperação"
-              class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-200 bg-gray-50 hover:bg-white"
+              class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-gray-50 hover:bg-white"
               required
             />
           </div>
@@ -146,7 +146,7 @@
           <!-- Campo Senha -->
           <div class="space-y-2">
             <label for="senha" class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <svg class="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
               </svg>
               Senha
@@ -156,16 +156,35 @@
               v-model="form.senha"
               type="password"
               placeholder="Digite sua senha"
-              class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-200 bg-gray-50 hover:bg-white"
+              class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-gray-50 hover:bg-white"
               required
             />
+          </div>
+
+          <!-- Campo Nível de Acesso -->
+          <div class="space-y-2">
+            <label for="nivel_acesso" class="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5 9 6.343 9 8s1.343 3 3 3zm0 2c-2.21 0-4 1.343-4 3v1h8v-1c0-1.657-1.79-3-4-3z" />
+              </svg>
+              Nível de Acesso
+            </label>
+            <select
+              id="nivel_acesso"
+              v-model="form.nivel_acesso"
+              class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-gray-50 hover:bg-white"
+            >
+              <option value="padrao">Padrão</option>
+              <option value="admin">Administrador</option>
+            </select>
           </div>
 
           <!-- Botão de Cadastro -->
           <button
             type="submit"
             :disabled="loading"
-            class="w-full bg-gradient-to-r from-pink-400 to-pink-600 text-white font-semibold py-4 rounded-xl hover:from-pink-500 hover:to-pink-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg mt-8"
+            class="w-full bg-gradient-to-r from-blue-400 to-blue-600 text-white font-semibold py-4 rounded-xl hover:from-blue-500 hover:to-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg mt-8"
           >
             <svg v-if="loading" class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -195,7 +214,8 @@ export default {
         nome: '',
         user: '',
         email_rec: '',
-        senha: ''
+        senha: '',
+        nivel_acesso: 'padrao'
       },
       loading: false,
       mensagemErro: '',

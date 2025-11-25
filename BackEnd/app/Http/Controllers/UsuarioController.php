@@ -14,14 +14,16 @@ class UsuarioController extends Controller
             'user' => 'required|string|unique:usuario,user',
             'senha' => 'required|string|min:6',
             'nome' => 'required|string|max:255',
-            'email_rec' => 'nullable|email|max:255'
+            'email_rec' => 'nullable|email|max:255',
+            'nivel_acesso' => 'required|in:padrao,admin',
         ]);
 
         $usuario = Usuario::create([
             'user' => $request->user,
             'senha' => $request->senha,
             'nome' => $request->nome,
-            'email_rec' => $request->email_rec
+            'email_rec' => $request->email_rec,
+            'nivel_acesso' => $request->input('nivel_acesso', 'padrao'),
         ]);
 
         return response()->json(['message' => 'Usuário registrado com sucesso!'], 201);
