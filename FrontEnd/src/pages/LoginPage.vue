@@ -139,7 +139,7 @@ export default {
 
         setTimeout(() => {
           this.$router.push('/menu');
-        }, 1500);
+        }, 500);
 
       } catch (error) {
         console.error('Erro ao fazer login:', error);
