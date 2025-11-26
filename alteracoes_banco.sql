@@ -1,3 +1,5 @@
+-- moviemntações: usuario -> usuario id
+
 ALTER TABLE movimentacoes_patrimonio
     -- 1. Remover a coluna antiga
     DROP COLUMN `usuario`,
@@ -15,7 +17,19 @@ ALTER TABLE movimentacoes_patrimonio
         ON DELETE SET NULL
         ON UPDATE CASCADE;
 
+-----------------
 
+-- 2) pedido: add usuario_id
+
+ALTER TABLE pedido_consumivel
+ADD COLUMN usuario_id INT UNSIGNED NULL AFTER observacoes;
+
+ALTER TABLE pedido_consumivel
+ADD CONSTRAINT fk_pedido_consumivel_usuario
+    FOREIGN KEY (usuario_id)
+    REFERENCES usuario(usuario_id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE;
 
 
 

@@ -78,14 +78,16 @@
         <div v-else class="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <!-- Header da tabela -->
           <div class="bg-gray-50 p-4 border-b border-gray-200">
-            <div class="grid grid-cols-12 gap-4 text-sm font-semibold text-gray-600">
-              <div class="col-span-2">Data/Hora</div>
-              <div class="col-span-2">Responsável</div>
-              <div class="col-span-2">Produto</div>
-              <div class="col-span-2">Tipo</div>
-              <div class="col-span-2">Localização Anterior</div>
-              <div class="col-span-2">Localização Nova</div>
-              <div class="col-span-2">Observações</div>
+            <!-- ALTERADO: de grid-cols-12 para grid-cols-7 -->
+            <div class="grid grid-cols-7 gap-4 text-sm font-semibold text-gray-600">
+              <!-- REMOVIDO: classe col-span-2 de todos os itens abaixo -->
+              <div>Data/Hora</div>
+              <div>Responsável</div>
+              <div>Produto</div>
+              <div>Tipo</div>
+              <div>Localização Anterior</div>
+              <div>Localização Nova</div>
+              <div>Observações</div>
             </div>
           </div>
 
@@ -96,22 +98,23 @@
               :key="movimentacao.movimentacao_id"
               class="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
             >
-              <div class="grid grid-cols-12 gap-4 items-center">
+              <!-- ALTERADO: de grid-cols-12 para grid-cols-7 -->
+              <div class="grid grid-cols-7 gap-4 items-center">
                 <!-- Data/Hora -->
-                <div class="col-span-2 text-sm">
+                <!-- REMOVIDO: classe col-span-2 de todas as divs abaixo -->
+                <div class="text-sm">
                   <p class="font-medium text-gray-800">{{ formatarData(movimentacao.data_movimentacao) }}</p>
                   <p class="text-xs text-gray-500">{{ formatarHora(movimentacao.data_movimentacao) }}</p>
                 </div>
 
-                <div class="col-span-2 text-sm flex items-center gap-2">
-                    
+                <div class="text-sm flex items-center gap-2">
                     <span class="text-gray-700 truncate" :title="movimentacao.responsavel?.name">
                         {{ movimentacao.responsavel?.nome || 'Sistema' }}
                     </span>
                 </div>
 
                 <!-- Produto -->
-                <div class="col-span-2 flex items-center gap-3">
+                <div class="flex items-center gap-3">
                   <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                     <img
                       v-if="movimentacao.produto.foto"
@@ -128,7 +131,7 @@
                 </div>
 
                 <!-- Tipo de Movimentação -->
-                <div class="col-span-2 text-sm">
+                <div class="text-sm">
                   <span 
                     :class="getBadgeClass(movimentacao.tipo_movimentacao)"
                     class="inline-flex items-center gap-1 px-3 py-1 rounded-full font-medium text-xs"
@@ -139,7 +142,7 @@
                 </div>
 
                 <!-- Localização Anterior -->
-                <div class="col-span-2 text-sm">
+                <div class="text-sm">
                   <div v-if="movimentacao.localizacao_anterior" class="flex items-center gap-2">
                     <MapPin class="w-3 h-3 text-gray-400" />
                     <span class="text-gray-700">{{ movimentacao.localizacao_anterior.nome }}</span>
@@ -148,7 +151,7 @@
                 </div>
 
                 <!-- Localização Nova -->
-                <div class="col-span-2 text-sm">
+                <div class="text-sm">
                   <div v-if="movimentacao.localizacao_nova" class="flex items-center gap-2">
                     <MapPin class="w-3 h-3 text-green-500" />
                     <span class="text-gray-700 font-medium">{{ movimentacao.localizacao_nova.nome }}</span>
@@ -157,7 +160,7 @@
                 </div>
 
                 <!-- Observações -->
-                <div class="col-span-2 text-sm">
+                <div class="text-sm">
                   <p class="text-gray-600 break-words" :title="movimentacao.observacao">
                     {{ movimentacao.observacao || '-' }}
                   </p>

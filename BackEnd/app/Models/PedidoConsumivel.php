@@ -23,6 +23,7 @@ class PedidoConsumivel extends Model
         'data_confirmacao',
         'data_alteracao',
         'observacoes',
+        'usuario_id',
         'observacao_cancelamento'
     ];
     
@@ -36,5 +37,10 @@ class PedidoConsumivel extends Model
     public function itens()
     {
         return $this->hasMany(ProdutoPedidoConsumivel::class, 'pedido_consumivel_id');
+    }
+
+    public function usuario()
+    {
+        return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 }

@@ -9,12 +9,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class PedidoConsumivelController extends Controller
 {
     public function index(Request $request)
     {
-        $query = PedidoConsumivel::with(['itens.produto']);
+        $query = PedidoConsumivel::with(['itens.produto', 'usuario']);
         $perPage = $request->input('per_page', 12);
         
         $pedidos = $query->orderBy('pedido_consumivel_id')
@@ -76,6 +77,7 @@ class PedidoConsumivelController extends Controller
             $pedido = PedidoConsumivel::create([
                 'status' => 'pendente',
                 'data_pedido' => now(),
+                'usuario_id' => Auth::id(),
                 'observacoes' => $request->observacao ?? null
             ]);
 

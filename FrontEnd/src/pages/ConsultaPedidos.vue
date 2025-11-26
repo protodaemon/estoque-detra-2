@@ -32,9 +32,11 @@
       </div>
 
       <div v-else class="bg-white rounded-xl shadow-lg border border-gray-300">
-        <div class="bg-gray-50 p-4 border border-gray-200 rounded-t-xl text-sm font-semibold text-gray-600 grid grid-cols-6 gap-4">
+        <!-- ALTERADO: grid-cols-6 para grid-cols-7 e adicionado coluna Usuário -->
+        <div class="bg-gray-50 p-4 border border-gray-200 rounded-t-xl text-sm font-semibold text-gray-600 grid grid-cols-7 gap-4">
           <div>Data</div>
           <div>ID</div>
+          <div>Usuário</div>
           <div class="col-span-2">Observação</div>
           <div>Itens</div>
           <div>Status</div>
@@ -42,10 +44,10 @@
 
         <div class="border-x border-b border-gray-200 rounded-b-xl overflow-y-auto">
           <template v-for="pedido in lista" :key="pedido.id || pedido.pedido_consumivel_id">
-            <!-- Linha do pedido -->
+            <!-- ALTERADO: grid-cols-6 para grid-cols-7 -->
             <button
               @click="togglePedido(pedido)"
-              class="w-full text-left p-4 grid grid-cols-6 gap-4 items-center hover:bg-white transition-colors border-b"
+              class="w-full text-left p-4 grid grid-cols-7 gap-4 items-center hover:bg-white transition-colors border-b"
               :class="{ 'bg-blue-50': pedidoExpandido === (pedido.id || pedido.pedido_consumivel_id) }"
             >
               <div class="text-sm text-gray-800">
@@ -54,6 +56,12 @@
               <div class="text-sm font-medium text-gray-800">
                 #{{ pedido.id || pedido.pedido_consumivel_id }}
               </div>
+              
+              <!-- NOVO: Campo Usuário -->
+              <div class="text-sm text-gray-800 truncate font-medium" :title="pedido.usuario?.nome || pedido.usuario?.name">
+                {{ pedido.usuario?.nome || pedido.usuario?.name || 'N/A' }}
+              </div>
+
               <div class="text-sm col-span-2 text-gray-600 truncate" :title="pedido.observacao || '-'">
                 {{ pedido.observacoes || '-' }}
               </div>
@@ -98,6 +106,17 @@
                         readonly
                         class="font-mono py-2 px-4 border-2 border-gray-200 rounded-lg bg-white text-gray-700 text-center"
                         :style="{ width: `${Math.max(60, String(pedido.id || pedido.pedido_consumivel_id).length * 12 + 40)}px` }"
+                      />
+                    </div>
+                    
+                    <!-- NOVO: Campo Usuário nos detalhes também -->
+                    <div class="flex-shrink-0 w-1/4">
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Solicitante</label>
+                      <input
+                        :value="pedido.usuario?.nome || pedido.usuario?.name || 'N/A'"
+                        type="text"
+                        readonly
+                        class="w-full py-2 px-4 border-2 border-gray-200 rounded-lg bg-white text-gray-700"
                       />
                     </div>
 
