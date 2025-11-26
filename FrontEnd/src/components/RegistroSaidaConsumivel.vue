@@ -106,7 +106,7 @@
           </div>
           <div class="text-right">
             <p class="text-sm text-gray-500">Estoque atual</p>
-            <p class="font-semibold text-gray-800">{{ selectedProduto.qtd_disponivel }} unidades</p>
+            <p class="font-semibold text-gray-800">{{ selectedProduto.quantidade }} unidades</p>
           </div>
         </div>
 
@@ -126,7 +126,7 @@
                 <Plus class="w-4 h-4" />
               </button>
             </div>
-            <p class="text-xs text-gray-500 mt-1">Novo estoque: {{ selectedProduto.qtd_disponivel + quantidade }} unidades</p>
+            <p class="text-xs text-gray-500 mt-1">Novo estoque: {{ selectedProduto.quantidade + quantidade }} unidades</p>
           </div>
 
           <div>
