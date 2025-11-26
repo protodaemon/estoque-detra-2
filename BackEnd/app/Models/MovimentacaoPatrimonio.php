@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class MovimentacaoPatrimonio extends Model
 {
@@ -15,7 +16,7 @@ class MovimentacaoPatrimonio extends Model
         'tipo_movimentacao',
         'localizacao_anterior_id',
         'localizacao_nova_id',
-        'usuario',
+        'usuario_id',
         'observacao',
         'data_movimentacao'
     ];
@@ -30,6 +31,11 @@ class MovimentacaoPatrimonio extends Model
     {
         return $this->belongsTo(ProdutoPatrimonio::class, 'produto_patrimonio_id', 'produtos_patrimonio_id')
             ->withTrashed(); // assim traz produtos mesmo que deletados
+    }
+
+    public function responsavel()
+    {
+        return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
 
@@ -50,7 +56,8 @@ class MovimentacaoPatrimonio extends Model
             'tipo_movimentacao' => 'criacao',
             'localizacao_nova_id' => $localizacaoId,
             'observacao' => $observacao,
-            'data_movimentacao' => now()
+            'data_movimentacao' => now(),
+            'usuario_id' => Auth::id()
         ]);
     }
 
@@ -61,7 +68,8 @@ class MovimentacaoPatrimonio extends Model
             'tipo_movimentacao' => 'exclusao',
             'localizacao_anterior_id' => $localizacaoAtual,
             'observacao' => $observacao,
-            'data_movimentacao' => now()
+            'data_movimentacao' => now(),
+            'usuario_id' => Auth::id()
         ]);
     }
 
@@ -73,7 +81,8 @@ class MovimentacaoPatrimonio extends Model
             'localizacao_anterior_id' => $localizacaoAnterior,
             'localizacao_nova_id' => $localizacaoNova,
             'observacao' => $observacao,
-            'data_movimentacao' => now()
+            'data_movimentacao' => now(),
+            'usuario_id' => Auth::id()
         ]);
     }
 }

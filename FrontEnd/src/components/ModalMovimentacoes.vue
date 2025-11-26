@@ -80,6 +80,7 @@
           <div class="bg-gray-50 p-4 border-b border-gray-200">
             <div class="grid grid-cols-12 gap-4 text-sm font-semibold text-gray-600">
               <div class="col-span-2">Data/Hora</div>
+              <div class="col-span-2">Responsável</div>
               <div class="col-span-2">Produto</div>
               <div class="col-span-2">Tipo</div>
               <div class="col-span-2">Localização Anterior</div>
@@ -100,6 +101,13 @@
                 <div class="col-span-2 text-sm">
                   <p class="font-medium text-gray-800">{{ formatarData(movimentacao.data_movimentacao) }}</p>
                   <p class="text-xs text-gray-500">{{ formatarHora(movimentacao.data_movimentacao) }}</p>
+                </div>
+
+                <div class="col-span-2 text-sm flex items-center gap-2">
+                    
+                    <span class="text-gray-700 truncate" :title="movimentacao.responsavel?.name">
+                        {{ movimentacao.responsavel?.nome || 'Sistema' }}
+                    </span>
                 </div>
 
                 <!-- Produto -->
@@ -222,13 +230,7 @@
         />
 
         <div class="flex gap-3 ml-auto">
-          <button
-            @click="exportarCSV"
-            class="px-6 py-3 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors rounded-xl font-medium flex items-center gap-2"
-          >
-            <Download class="w-4 h-4" />
-            Exportar CSV
-          </button>
+          
           <button
             @click="closeModal"
             class="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700 transition-colors rounded-xl font-medium"
@@ -429,44 +431,7 @@ export default {
       });
     },
 
-    async exportarCSV() {
-      try {
-        const params = {
-          per_page: 9999, // Buscar todos
-        };
-
-        if (this.searchTerm.trim()) params.produto = this.searchTerm.trim();
-        if (this.tipoFiltro) params.tipo = this.tipoFiltro;
-        if (this.dataFiltro) {
-          params.data_inicio = this.dataFiltro;
-          params.data_fim = this.dataFiltro;
-        }
-
-        const response = await axios.get('/movimentacoes-patrimonio', { params });
-        const dados = response.data.data;
-
-        let csv = 'Data/Hora;Produto;Número;Tipo;Localização Anterior;Localização Nova;Observações\n';
-        
-        dados.forEach(mov => {
-          csv += `${this.formatarData(mov.data_movimentacao)} ${this.formatarHora(mov.data_movimentacao)};`;
-          csv += `${mov.produto.nome};`;
-          csv += `${mov.produto.numero_identificacao};`;
-          csv += `${this.getTipoLabel(mov.tipo_movimentacao)};`;
-          csv += `${mov.localizacao_anterior?.nome || '-'};`;
-          csv += `${mov.localizacao_nova?.nome || '-'};`;
-          csv += `${mov.observacao || '-'}\n`;
-        });
-
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `movimentacoes_${new Date().toISOString().split('T')[0]}.csv`;
-        link.click();
-      } catch (error) {
-        console.error('Erro ao exportar CSV:', error);
-        alert('Erro ao exportar CSV');
-      }
-    },
+    
 
     closeModal() {
       this.$emit('close');

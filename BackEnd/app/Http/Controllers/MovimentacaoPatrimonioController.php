@@ -12,7 +12,8 @@ class MovimentacaoPatrimonioController extends Controller
         $query = MovimentacaoPatrimonio::with([
             'produto.categoria',
             'localizacaoAnterior',
-            'localizacaoNova'
+            'localizacaoNova',
+            'responsavel'
         ]);
 
         // Filtro por produto
