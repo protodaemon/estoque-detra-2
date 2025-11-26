@@ -189,10 +189,10 @@ export default {
           requerSenha: true // Marcar rotas que precisam de senha
         },
         {
-          titulo: 'Realizar Pedido',
+          titulo: 'Pedidos',
           rota: '/menu-pedidos',
           icone: 'Inbox',
-          descricao: "Gerenciar pedidos de produtos para consumo",
+          descricao: "Pedidos de produtos para consumo",
           cor: 'blue',
           badge: null,
           requerSenha: false // Esta não precisa de senha

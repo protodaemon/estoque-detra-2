@@ -126,7 +126,7 @@
                 <Plus class="w-4 h-4" />
               </button>
             </div>
-            <p class="text-xs text-gray-500 mt-1">Novo estoque: {{ selectedProduto.quantidade + quantidade }} unidades</p>
+            <p class="text-xs text-gray-500 mt-1">Novo estoque: {{ selectedProduto.quantidade - quantidade }} unidades</p>
           </div>
 
           <div>
