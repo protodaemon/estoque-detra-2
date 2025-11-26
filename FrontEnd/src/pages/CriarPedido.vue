@@ -55,6 +55,7 @@
           </div>
 
           <!-- BOTÃO EDITAR PEDIDOS -->
+           <!--
           <div class="flex items-center">
             <button
               @click="abrirHistorico"
@@ -67,7 +68,7 @@
               </svg>
               Editar Pedidos
             </button>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
