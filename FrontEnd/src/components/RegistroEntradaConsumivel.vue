@@ -106,7 +106,7 @@
           </div>
           <div class="text-right">
             <p class="text-sm text-gray-500">Estoque atual</p>
-            <p class="font-semibold text-gray-800">{{ selectedProduto.qtd_disponivel }} unidades</p>
+            <p class="font-semibold text-gray-800">{{ selectedProduto.quantidade }} unidades</p>
           </div>
         </div>
 
