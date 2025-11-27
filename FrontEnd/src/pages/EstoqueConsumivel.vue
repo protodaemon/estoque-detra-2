@@ -276,8 +276,8 @@
       
       <!-- Stats -->
       <div class="space-y-2 text-sm mb-3">  
-        <div class="flex justify-between">
-          <span class="text-gray-500">Quantidade: :</span>
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">Quantidade: </span>
           <span class="text-green-600 font-medium">{{ peca.quantidade}}</span>
         </div>
       </div>

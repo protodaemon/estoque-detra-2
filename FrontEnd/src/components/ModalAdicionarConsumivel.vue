@@ -92,9 +92,26 @@
             class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-200 bg-gray-50 hover:bg-white resize-none">
           </textarea>
         </div>
+
+                <!-- NOVA SEÇÃO: Quantidade -->
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-sm font-semibold text-gray-700">
+            <svg class="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+            </svg>
+            Quantidade
+          </label>
+          <input 
+            v-model.number="form.quantidade" 
+            type="number"
+            min="0"
+            placeholder="0" 
+            class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all duration-200 bg-gray-50 hover:bg-white" />
+            <p class="text-xs text-gray-500">Informe a quantidade em estoque (mínimo 0).</p>
+        </div>
         
 
-        <!-- Descrição -->
+        <!-- Observações -->
         <div class="space-y-2">
           <label class="flex items-center gap-2 text-sm font-semibold text-gray-700">
             <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,6 +205,7 @@ export default {
         descricao: '', // novo campo
         // numero_identificacao: '',
         observacoes: '',
+        quantidade: 0,
         foto: null
       },
       preview: null,
@@ -222,6 +240,7 @@ export default {
       formData.append('nome', this.form.nome);
       formData.append('descricao', this.form.descricao); // enviar descrição
       formData.append('observacoes', this.form.observacoes);
+      formData.append('quantidade', this.form.quantidade);
       // formData.append('numero_identificacao', this.form.numero_identificacao);
       if (this.form.foto) {
         formData.append('foto', this.form.foto);
