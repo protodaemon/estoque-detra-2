@@ -14,7 +14,8 @@ for (const [key, component] of Object.entries(lucide)) {
 }
 
 // 🌐 Base URL global
-axios.defaults.baseURL = 'http://localhost:8000/api';
+//axios.defaults.baseURL = 'http://localhost:8000/api';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 // axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 // Inclui token se existir

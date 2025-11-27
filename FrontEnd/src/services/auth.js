@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api'; // URL do backend Laravel
-//mudar pra prod
+//const API_BASE_URL = 'http://localhost:8000/api'; // URL do backend Laravel
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 // 🔧 cria uma instância Axios própria (com interceptores)
 const api = axios.create({
